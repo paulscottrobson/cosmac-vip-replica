@@ -21,7 +21,7 @@ F0 		"LDX"					$D = $read($R[$X])
 72 		"LDXA"					$D = $read($R[$X]);$R[$X] = ($R[$X]+1) & 0xFFFF
 F8 		"LDI .1"				$D = $fetch()
 50-5F 	"STR R@R"				$write($R[0x@R],$D)
-73 		"STXD"					$write($R[$X]);$R[$X] = ($R[$X]-1) & 0xFFFF
+73 		"STXD"					$write($R[$X],$D);$R[$X] = ($R[$X]-1) & 0xFFFF
 
 // *************************************************************************************************
 //										Register operations
@@ -55,20 +55,20 @@ FE 		"SHL"					$DF = ($D >> 7) & 1;$D = ($D << 1) & 0xFF
 //										Arithmetic Operations
 // *************************************************************************************************
 
-F4 		"ADD"					$add($D,$read($R[$X]),0)
-FC 		"ADI .1"				$add($D,$fetch(),0)
-74 		"ADC"					$add($D,$read($R[$X]),$DF)
-7C 		"ADCI .1"				$add($D,$fetch(),$DF)
+F4 		"ADD"					@ADD($D,$read($R[$X]),0)
+FC 		"ADI .1"				@ADD($D,$fetch(),0)
+74 		"ADC"					@ADD($D,$read($R[$X]),$DF)
+7C 		"ADCI .1"				@ADD($D,$fetch(),$DF)
 
-F5 		"SD"					$add($D^0xFF,$read($R[$X]),1)
-FD 		"SDI .1"				$add($D^0xFF,$fetch(),1)
-75 		"SD"					$add($D^0xFF,$read($R[$X]),$DF)
-7D 		"SDI .1"				$add($D^0xFF,$fetch(),$DF)
+F5 		"SD"					@ADD($D^0xFF,$read($R[$X]),1)
+FD 		"SDI .1"				@ADD($D^0xFF,$fetch(),1)
+75 		"SD"					@ADD($D^0xFF,$read($R[$X]),$DF)
+7D 		"SDI .1"				@ADD($D^0xFF,$fetch(),$DF)
 
-F7 		"SM"					$add($D,$read($R[$X])^0xFF,1)
-FF 		"SMI .1"				$add($D,$fetch()^0xFF,1)
-77 		"SMB"					$add($D,$read($R[$X])^0xFF,$DF)
-7F 		"SMBI .1"				$add($D,$fetch()^0xFF,$DF)
+F7 		"SM"					@ADD($D,$read($R[$X])^0xFF,1)
+FF 		"SMI .1"				@ADD($D,$fetch()^0xFF,1)
+77 		"SMB"					@ADD($D,$read($R[$X])^0xFF,$DF)
+7F 		"SMBI .1"				@ADD($D,$fetch()^0xFF,$DF)
 
 // *************************************************************************************************
 //								Branch instructions (short branch)
@@ -104,22 +104,22 @@ C9 		"LBNQ .2"				@FETCH16;if ($Q == 0) { @LBRANCH; }
 // *************************************************************************************************
 
 38 		"SKP"					$T8 = fetch()
-C8 		"LSKP"					@FETCH16()
+C8 		"LSKP"					@LSKIP()
 
-CE 		"LSZ .2"				if ($D == 0) { @FETCH16; }
-C6 		"LSNZ .2"				if ($D != 0) { @FETCH16; }
-CF 		"LSDF .2"				if ($DF != 0) { @FETCH16; }
-C7 		"LSNF .2"				if ($DF == 0) { @FETCH16; }
-CD 		"LSQ .2"				if ($Q != 0) { @FETCH16; }
-C5 		"LSNQ .2"				if ($Q == 0) { @FETCH16; }
-CC 		"LSIE .2"				if ($IE != 0) { @FETCH16; }
+CE 		"LSZ .2"				if ($D == 0) { @LSKIP; }
+C6 		"LSNZ .2"				if ($D != 0) { @LSKIP; }
+CF 		"LSDF .2"				if ($DF != 0) { @LSKIP; }
+C7 		"LSNF .2"				if ($DF == 0) { @LSKIP; }
+CD 		"LSQ .2"				if ($Q != 0) { @LSKIP; }
+C5 		"LSNQ .2"				if ($Q == 0) { @LSKIP; }
+CC 		"LSIE .2"				if ($IE != 0) { @LSKIP; }
 
 // *************************************************************************************************
 //									Control Instructions
 // *************************************************************************************************
 
-00 		"IDL"					{}
-C4 		"NOP"					{}
+00 		"IDL"					;
+C4 		"NOP"					;
 
 D0-DF 	"SEP R@R"				$P = 0x@R
 E0-EF 	"SEX R@R"				$X = 0x@R
@@ -133,7 +133,7 @@ E0-EF 	"SEX R@R"				$X = 0x@R
 70 		"RET"					$T8 = $read($R[$X]);$R[$X] = ($R[$X]+1) & 0xFFFF;$X = ($T8 >> 4) & 0xF;$P = $T8 & 0xF;$IE = 1
 71 		"DIS"					$T8 = $read($R[$X]);$R[$X] = ($R[$X]+1) & 0xFFFF;$X = ($T8 >> 4) & 0xF;$P = $T8 & 0xF;$IE = 0
 
-68 		"I68"	 				{}
+68 		"I68"	 				;
 
 // *************************************************************************************************
 //										Input-Output Byte Transfer
