@@ -74,17 +74,17 @@ FF 		"SMI .1"				@ADD($D,$fetch()^0xFF,1)
 //								Branch instructions (short branch)
 // *************************************************************************************************
 
-30 		"BR .1"					$T8 = fetch();@BRANCH
+30 		"BR .1"					$T8 = $FETCH();@BRANCH
 
-32 		"BZ .1"					$T8 = fetch();if ($D == 0) { @BRANCH; }
-3A 		"BNZ .1"				$T8 = fetch();if ($D != 0) { @BRANCH; }
-33 		"BDF .1"				$T8 = fetch();if ($DF != 0) { @BRANCH; }
-3B 		"BNF .1"				$T8 = fetch();if ($DF == 0) { @BRANCH; }
-31 		"BQ .1"					$T8 = fetch();if ($Q != 0) { @BRANCH; }
-39 		"BNQ .1"				$T8 = fetch();if ($Q == 0) { @BRANCH; }
+32 		"BZ .1"					$T8 = $FETCH();if ($D == 0) { @BRANCH; }
+3A 		"BNZ .1"				$T8 = $FETCH();if ($D != 0) { @BRANCH; }
+33 		"BDF .1"				$T8 = $FETCH();if ($DF != 0) { @BRANCH; }
+3B 		"BNF .1"				$T8 = $FETCH();if ($DF == 0) { @BRANCH; }
+31 		"BQ .1"					$T8 = $FETCH();if ($Q != 0) { @BRANCH; }
+39 		"BNQ .1"				$T8 = $FETCH();if ($Q == 0) { @BRANCH; }
 
-34-37 	"B@E .1"				$T8 = fetch();if ($eflag(@E) != 0) { @BRANCH; }
-3C-3F 	"BN@E .1"				$T8 = fetch();if ($eflag(@E) == 0) { @BRANCH; }
+34-37 	"B@E .1"				$T8 = $FETCH();if ($eflag(@E) != 0) { @BRANCH; }
+3C-3F 	"BN@E .1"				$T8 = $FETCH();if ($eflag(@E) == 0) { @BRANCH; }
 
 // *************************************************************************************************
 //								Branch instructions (long branch)
@@ -103,8 +103,8 @@ C9 		"LBNQ .2"				@FETCH16;if ($Q == 0) { @LBRANCH; }
 //										Skip Instructions
 // *************************************************************************************************
 
-38 		"SKP"					$T8 = fetch()
-C8 		"LSKP"					@LSKIP()
+38 		"SKP"					$T8 = $FETCH()
+C8 		"LSKP"					@LSKIP
 
 CE 		"LSZ .2"				if ($D == 0) { @LSKIP; }
 C6 		"LSNZ .2"				if ($D != 0) { @LSKIP; }

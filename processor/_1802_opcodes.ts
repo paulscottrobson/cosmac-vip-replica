@@ -149,52 +149,52 @@ private opcode_2f(): void { /*** dec rf ***/
     this.r[0xF] = (this.r[0xF]-1) & 0xFFFF;
 }
 private opcode_30(): void { /*** br .1 ***/
-    this.t8 = fetch();this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8;
+    this.t8 = this.fetch();this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8;
 }
 private opcode_31(): void { /*** bq .1 ***/
-    this.t8 = fetch();if (this.q != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.q != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_32(): void { /*** bz .1 ***/
-    this.t8 = fetch();if (this.d == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.d == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_33(): void { /*** bdf .1 ***/
-    this.t8 = fetch();if (this.df != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.df != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_34(): void { /*** b1 .1 ***/
-    this.t8 = fetch();if (this.eflag(1) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(1) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_35(): void { /*** b2 .1 ***/
-    this.t8 = fetch();if (this.eflag(2) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(2) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_36(): void { /*** b3 .1 ***/
-    this.t8 = fetch();if (this.eflag(3) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(3) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_37(): void { /*** b4 .1 ***/
-    this.t8 = fetch();if (this.eflag(4) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(4) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_38(): void { /*** skp ***/
-    this.t8 = fetch();
+    this.t8 = this.fetch();
 }
 private opcode_39(): void { /*** bnq .1 ***/
-    this.t8 = fetch();if (this.q == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.q == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3a(): void { /*** bnz .1 ***/
-    this.t8 = fetch();if (this.d != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.d != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3b(): void { /*** bnf .1 ***/
-    this.t8 = fetch();if (this.df == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.df == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3c(): void { /*** bn1 .1 ***/
-    this.t8 = fetch();if (this.eflag(1) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(1) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3d(): void { /*** bn2 .1 ***/
-    this.t8 = fetch();if (this.eflag(2) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(2) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3e(): void { /*** bn3 .1 ***/
-    this.t8 = fetch();if (this.eflag(3) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(3) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3f(): void { /*** bn4 .1 ***/
-    this.t8 = fetch();if (this.eflag(4) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag(4) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_40(): void { /*** lda r0 ***/
     this.d = this.read(this.r[0x0]);this.r[0x0] = (this.r[0x0]+1) & 0xFFFF;
@@ -605,7 +605,7 @@ private opcode_c7(): void { /*** lsnf .2 ***/
     if (this.df == 0) { this.r[this.p] = (this.r[this.p]+2) & 0xFFFF; };this.cycles++;
 }
 private opcode_c8(): void { /*** lskp ***/
-    this.r[this.p] = (this.r[this.p]+2) & 0xFFFF();this.cycles++;
+    this.r[this.p] = (this.r[this.p]+2) & 0xFFFF;this.cycles++;
 }
 private opcode_c9(): void { /*** lbnq .2 ***/
     this.t16=this.fetch();this.t16=(this.t16 << 8)|this.fetch();if (this.q == 0) { this.r[this.p] = this.t16; };this.cycles++;
