@@ -31,8 +31,8 @@ F8 		"LDI .1"				$D = $fetch()
 20-2F 	"DEC R@R" 				$R[0x@R] = ($R[0x@R]-1) & 0xFFFF
 60 		"IRX"					$R[$X] = ($R[$X]+1) & 0xFFFF
 80-8F 	"GLO R@R"				$D = $R[0x@R] & 0xFF
-90-9F 	"PLO R@R"				$R[0x@R] = ($R[0x@R] & 0xFF00) | $D
-A0-AF 	"GHI R@R"				$D = ($R[0x@R] >> 8) & 0xFF
+A0-AF 	"PLO R@R"				$R[0x@R] = ($R[0x@R] & 0xFF00) | $D
+90-9F 	"GHI R@R"				$D = ($R[0x@R] >> 8) & 0xFF
 B0-BF 	"PHI R@R"				$R[0x@R] = ($R[0x@R] & 0x00FF) | ($D << 8)
 
 // *************************************************************************************************
@@ -41,10 +41,10 @@ B0-BF 	"PHI R@R"				$R[0x@R] = ($R[0x@R] & 0x00FF) | ($D << 8)
 
 F1 		"OR"					$D = $D | $read($R[$X])
 F9 		"ORI .1"				$D = $D | $fetch()
-F2 		"XOR"					$D = $D ^ $read($R[$X])
-FA 		"XRI .1"				$D = $D ^ $fetch()
-F3 		"AND"					$D = $D & $read($R[$X])
-FB 		"ANI .1"				$D = $D & $fetch()
+F3 		"XOR"					$D = $D ^ $read($R[$X])
+FB 		"XRI .1"				$D = $D ^ $fetch()
+F2 		"AND"					$D = $D & $read($R[$X])
+FA 		"ANI .1"				$D = $D & $fetch()
 
 F6 		"SHR" 					$DF = $D & 1;$D = ($D >> 1) & 0x7F
 76 		"RSHR"					$T16 = $D | ($DF << 8);$DF = $D & 1;$D = ($T16 >> 1) & 0xFF
@@ -83,8 +83,8 @@ FF 		"SMI .1"				@ADD($D,$fetch()^0xFF,1)
 31 		"BQ .1"					$T8 = $FETCH();if ($Q != 0) { @BRANCH; }
 39 		"BNQ .1"				$T8 = $FETCH();if ($Q == 0) { @BRANCH; }
 
-34-37 	"B@E .1"				$T8 = $FETCH();if ($eflag(@E) != 0) { @BRANCH; }
-3C-3F 	"BN@E .1"				$T8 = $FETCH();if ($eflag(@E) == 0) { @BRANCH; }
+34-37 	"B@E .1"				$T8 = $FETCH();if ($eflag@E() != 0) { @BRANCH; }
+3C-3F 	"BN@E .1"				$T8 = $FETCH();if ($eflag@E() == 0) { @BRANCH; }
 
 // *************************************************************************************************
 //								Branch instructions (long branch)
@@ -139,7 +139,7 @@ E0-EF 	"SEX R@R"				$X = 0x@R
 //										Input-Output Byte Transfer
 // *************************************************************************************************
 
-61-67 	"OUT @P" 				$output(@P,$read($R[$X]));$R[$X] = ($R[$X]+1) & 0xFFFF
+61-67 	"OUT @P" 				$output@P($read($R[$X]));$R[$X] = ($R[$X]+1) & 0xFFFF
 
-69-6F 	"INP @P"				$D = $input(@P);$write($R[$X],$D)
+69-6F 	"INP @P"				$D = $input@P();$write($R[$X],$D)
 

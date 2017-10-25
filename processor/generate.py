@@ -96,3 +96,12 @@ for i in range(0,256):
 	h.write("    "+instructions[i].getCode(i,"T")+";\n}\n")
 h.write("}\n")
 h.close()
+
+h = open("_1802_ports.h","w")
+for p in range(1,8):
+	h.write("#ifndef INPUT{0}\n#define INPUT{0}() (0)\n#endif\n".format(p))
+	h.write("#ifndef OUTPUT{0}\n#define OUTPUT{0}(x) {{}}\n#endif\n".format(p))
+for p in range(1,5):
+	h.write("#ifndef EFLAG{0}\n#define EFLAG{0}() (0)\n#endif\n".format(p))
+h.write("#ifndef UPDATEQ\n#define UPDATEQ(x) {{}}\n#endif\n".format(p))
+h.close()

@@ -42,15 +42,21 @@
 static BYTE8 D,DF,P,X,Q,T,IE,T8;
 static WORD16 R[16],T16;
 
-static BYTE8 RAM[RAMSIZE	];
-static BYTE8 ROM[] = 
+static BYTE8 RAM[RAMSIZE];
+static BYTE8 ROM[32768];
+
+static BYTE8 BIOS[512] = 
 #include "vip_rom.h"
 
 static WORD16 CYCLES;
 
+// *******************************************************************************************************************************
+//											Read/Write Inline Functions
+// *******************************************************************************************************************************
+
 static BYTE8 inline __Read(WORD16 addr) {
 	if (addr < RAMSIZE) return RAM[addr];
-	if (addr & 0x8000) return ROM[addr & 0x1FF];
+	if (addr & 0x8000) return ROM[addr & 0x7FFF];
 	return 0xFF;
 }
 
@@ -67,21 +73,38 @@ static void inline __Write(WORD16 addr,BYTE8 data) {
 //														Hardware
 // *******************************************************************************************************************************
 
-#define INPUT(p) 	(0)
-#define OUTPUT(p,d) {}
-#define EFLAG(n) 	(0)
-#define UPDATEQ(v)	{}
+#define INPUT1() 		HWISetScreenOn(1);						// INP1 video on
+#define OUTPUT1(x) 		{ HWISetScreenOn(0); }					// OUT1 video off
+#define OUTPUT2(x) 		{ HWISetKeyboardLatch(x); }				// OUT2 keyboard latch
+#define EFLAG1() 		(IE == 0) 								// Video in progress
+#define EFLAG3() 		HWIIsHexKeypadPressed()
+
+#include "_1802_ports.h"
 
 // *******************************************************************************************************************************
 //														Reset the CPU
 // *******************************************************************************************************************************
 
+static BYTE8 firstRun = 1;
+
 void CPUReset(void) {
+
+	if (firstRun) {
+		firstRun = 0;
+		for (WORD16 a = 0;a < 32768;a++) {
+			ROM[a] = ((a & 0x1FF) == 0x22) ? 0x30: BIOS[a & 0x1FF];
+		}			
+	}
+
 	Q = 0;IE = 1; 
 	X = P = R[0] = 0; 
 	DF &= 1;
-	HWIReset();
 	CYCLES = 0;
+
+	R[0] = R[2] = 0x8008;
+	X = P = 2;
+	D = 8;
+
 }
 
 // *******************************************************************************************************************************
@@ -118,7 +141,7 @@ BYTE8 CPUExecuteInstruction(void) {
 		#include "_1802_case.h"
 	}
 	CYCLES = CYCLES + 2;
-	if (CYCLES >= CYCLES_PER_FRAME-29) {								// If we are at INT time.
+	if (CYCLES >= CYCLES_PER_FRAME-29 && HWIGetScreenOn() != 0 && IE != 0) {		// If we are at INT time.
 		if (IE != 0) {													// and interrupts are enabled
 			CPUInterrupt();
 			CYCLES = CYCLES_PER_FRAME - 29;								// Make it EXACTLY 29 CYCLES to display start
@@ -126,13 +149,24 @@ BYTE8 CPUExecuteInstruction(void) {
 		}
 	}	
 	if (CYCLES < CYCLES_PER_FRAME) return 0;							// Not completed a frame.
-	//HWISetPageAddress(R[0]);											// Set the display address.
+	HWISetVideoAddress(R[0],R[P]);										// Set the display address.
 	HWIEndFrame();														// End of Frame code
 	CYCLES = CYCLES - CYCLES_PER_FRAME;									// Adjust this frame rate.
 	CYCLES = CYCLES + RENDERING_CYCLES;									// Fix it back for the video generation.
 	return NTSC_FRAMES_PER_SECOND;										// Return frame rate.
 }
 
+// *******************************************************************************************************************************
+//												Read/Write Memory
+// *******************************************************************************************************************************
+
+WORD16 CPUReadMemory(WORD16 address) {
+	return __Read(address);
+}
+
+void CPUWriteMemory(WORD16 address,WORD16 data) {
+	__Write(address,data);
+}
 
 #ifdef INCLUDE_DEBUGGING_SUPPORT
 
@@ -159,18 +193,6 @@ WORD16 CPUGetStepOverBreakpoint(void) {
 }
 
 // *******************************************************************************************************************************
-//												Read/Write Memory
-// *******************************************************************************************************************************
-
-WORD16 CPUReadMemory(WORD16 address) {
-	return __Read(address);
-}
-
-void CPUWriteMemory(WORD16 address,WORD16 data) {
-	__Write(address,data);
-}
-
-// *******************************************************************************************************************************
 //												Load a binary file into ROM
 // *******************************************************************************************************************************
 
@@ -189,10 +211,10 @@ void CPULoadBinary(const char *fileName) {
 static CPUSTATUS s;																	// Status area
 
 CPUSTATUS *CPUGetStatus(void) {
-	return &s;
 	s.d = D;s.df = DF;s.ie = IE;s.q = Q;s.t = T;s.x = X;s.p = P;
 	for (int i = 0;i < 16;i++) s.r[i] = R[i];
 	s.cycles = CYCLES;s.pc = R[P];
+	return &s;
 }
 
 #endif

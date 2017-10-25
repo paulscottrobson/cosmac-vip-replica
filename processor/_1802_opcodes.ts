@@ -161,16 +161,16 @@ private opcode_33(): void { /*** bdf .1 ***/
     this.t8 = this.fetch();if (this.df != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_34(): void { /*** b1 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(1) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag1() != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_35(): void { /*** b2 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(2) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag2() != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_36(): void { /*** b3 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(3) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag3() != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_37(): void { /*** b4 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(4) != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag4() != 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_38(): void { /*** skp ***/
     this.t8 = this.fetch();
@@ -185,16 +185,16 @@ private opcode_3b(): void { /*** bnf .1 ***/
     this.t8 = this.fetch();if (this.df == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3c(): void { /*** bn1 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(1) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag1() == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3d(): void { /*** bn2 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(2) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag2() == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3e(): void { /*** bn3 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(3) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag3() == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_3f(): void { /*** bn4 .1 ***/
-    this.t8 = this.fetch();if (this.eflag(4) == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
+    this.t8 = this.fetch();if (this.eflag4() == 0) { this.r[this.p] = (this.r[this.p] & 0xFF00) | this.t8; };
 }
 private opcode_40(): void { /*** lda r0 ***/
     this.d = this.read(this.r[0x0]);this.r[0x0] = (this.r[0x0]+1) & 0xFFFF;
@@ -296,49 +296,49 @@ private opcode_60(): void { /*** irx ***/
     this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_61(): void { /*** out 1 ***/
-    this.output(1,this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
+    this.output1(this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_62(): void { /*** out 2 ***/
-    this.output(2,this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
+    this.output2(this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_63(): void { /*** out 3 ***/
-    this.output(3,this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
+    this.output3(this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_64(): void { /*** out 4 ***/
-    this.output(4,this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
+    this.output4(this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_65(): void { /*** out 5 ***/
-    this.output(5,this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
+    this.output5(this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_66(): void { /*** out 6 ***/
-    this.output(6,this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
+    this.output6(this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_67(): void { /*** out 7 ***/
-    this.output(7,this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
+    this.output7(this.read(this.r[this.x]));this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;
 }
 private opcode_68(): void { /*** i68 ***/
     ;
 }
 private opcode_69(): void { /*** inp 1 ***/
-    this.d = this.input(1);this.write(this.r[this.x],this.d);
+    this.d = this.input1();this.write(this.r[this.x],this.d);
 }
 private opcode_6a(): void { /*** inp 2 ***/
-    this.d = this.input(2);this.write(this.r[this.x],this.d);
+    this.d = this.input2();this.write(this.r[this.x],this.d);
 }
 private opcode_6b(): void { /*** inp 3 ***/
-    this.d = this.input(3);this.write(this.r[this.x],this.d);
+    this.d = this.input3();this.write(this.r[this.x],this.d);
 }
 private opcode_6c(): void { /*** inp 4 ***/
-    this.d = this.input(4);this.write(this.r[this.x],this.d);
+    this.d = this.input4();this.write(this.r[this.x],this.d);
 }
 private opcode_6d(): void { /*** inp 5 ***/
-    this.d = this.input(5);this.write(this.r[this.x],this.d);
+    this.d = this.input5();this.write(this.r[this.x],this.d);
 }
 private opcode_6e(): void { /*** inp 6 ***/
-    this.d = this.input(6);this.write(this.r[this.x],this.d);
+    this.d = this.input6();this.write(this.r[this.x],this.d);
 }
 private opcode_6f(): void { /*** inp 7 ***/
-    this.d = this.input(7);this.write(this.r[this.x],this.d);
+    this.d = this.input7();this.write(this.r[this.x],this.d);
 }
 private opcode_70(): void { /*** ret ***/
     this.t8 = this.read(this.r[this.x]);this.r[this.x] = (this.r[this.x]+1) & 0xFFFF;this.x = (this.t8 >> 4) & 0xF;this.p = this.t8 & 0xF;this.ie = 1;
@@ -436,101 +436,101 @@ private opcode_8e(): void { /*** glo re ***/
 private opcode_8f(): void { /*** glo rf ***/
     this.d = this.r[0xF] & 0xFF;
 }
-private opcode_90(): void { /*** plo r0 ***/
-    this.r[0x0] = (this.r[0x0] & 0xFF00) | this.d;
-}
-private opcode_91(): void { /*** plo r1 ***/
-    this.r[0x1] = (this.r[0x1] & 0xFF00) | this.d;
-}
-private opcode_92(): void { /*** plo r2 ***/
-    this.r[0x2] = (this.r[0x2] & 0xFF00) | this.d;
-}
-private opcode_93(): void { /*** plo r3 ***/
-    this.r[0x3] = (this.r[0x3] & 0xFF00) | this.d;
-}
-private opcode_94(): void { /*** plo r4 ***/
-    this.r[0x4] = (this.r[0x4] & 0xFF00) | this.d;
-}
-private opcode_95(): void { /*** plo r5 ***/
-    this.r[0x5] = (this.r[0x5] & 0xFF00) | this.d;
-}
-private opcode_96(): void { /*** plo r6 ***/
-    this.r[0x6] = (this.r[0x6] & 0xFF00) | this.d;
-}
-private opcode_97(): void { /*** plo r7 ***/
-    this.r[0x7] = (this.r[0x7] & 0xFF00) | this.d;
-}
-private opcode_98(): void { /*** plo r8 ***/
-    this.r[0x8] = (this.r[0x8] & 0xFF00) | this.d;
-}
-private opcode_99(): void { /*** plo r9 ***/
-    this.r[0x9] = (this.r[0x9] & 0xFF00) | this.d;
-}
-private opcode_9a(): void { /*** plo ra ***/
-    this.r[0xA] = (this.r[0xA] & 0xFF00) | this.d;
-}
-private opcode_9b(): void { /*** plo rb ***/
-    this.r[0xB] = (this.r[0xB] & 0xFF00) | this.d;
-}
-private opcode_9c(): void { /*** plo rc ***/
-    this.r[0xC] = (this.r[0xC] & 0xFF00) | this.d;
-}
-private opcode_9d(): void { /*** plo rd ***/
-    this.r[0xD] = (this.r[0xD] & 0xFF00) | this.d;
-}
-private opcode_9e(): void { /*** plo re ***/
-    this.r[0xE] = (this.r[0xE] & 0xFF00) | this.d;
-}
-private opcode_9f(): void { /*** plo rf ***/
-    this.r[0xF] = (this.r[0xF] & 0xFF00) | this.d;
-}
-private opcode_a0(): void { /*** ghi r0 ***/
+private opcode_90(): void { /*** ghi r0 ***/
     this.d = (this.r[0x0] >> 8) & 0xFF;
 }
-private opcode_a1(): void { /*** ghi r1 ***/
+private opcode_91(): void { /*** ghi r1 ***/
     this.d = (this.r[0x1] >> 8) & 0xFF;
 }
-private opcode_a2(): void { /*** ghi r2 ***/
+private opcode_92(): void { /*** ghi r2 ***/
     this.d = (this.r[0x2] >> 8) & 0xFF;
 }
-private opcode_a3(): void { /*** ghi r3 ***/
+private opcode_93(): void { /*** ghi r3 ***/
     this.d = (this.r[0x3] >> 8) & 0xFF;
 }
-private opcode_a4(): void { /*** ghi r4 ***/
+private opcode_94(): void { /*** ghi r4 ***/
     this.d = (this.r[0x4] >> 8) & 0xFF;
 }
-private opcode_a5(): void { /*** ghi r5 ***/
+private opcode_95(): void { /*** ghi r5 ***/
     this.d = (this.r[0x5] >> 8) & 0xFF;
 }
-private opcode_a6(): void { /*** ghi r6 ***/
+private opcode_96(): void { /*** ghi r6 ***/
     this.d = (this.r[0x6] >> 8) & 0xFF;
 }
-private opcode_a7(): void { /*** ghi r7 ***/
+private opcode_97(): void { /*** ghi r7 ***/
     this.d = (this.r[0x7] >> 8) & 0xFF;
 }
-private opcode_a8(): void { /*** ghi r8 ***/
+private opcode_98(): void { /*** ghi r8 ***/
     this.d = (this.r[0x8] >> 8) & 0xFF;
 }
-private opcode_a9(): void { /*** ghi r9 ***/
+private opcode_99(): void { /*** ghi r9 ***/
     this.d = (this.r[0x9] >> 8) & 0xFF;
 }
-private opcode_aa(): void { /*** ghi ra ***/
+private opcode_9a(): void { /*** ghi ra ***/
     this.d = (this.r[0xA] >> 8) & 0xFF;
 }
-private opcode_ab(): void { /*** ghi rb ***/
+private opcode_9b(): void { /*** ghi rb ***/
     this.d = (this.r[0xB] >> 8) & 0xFF;
 }
-private opcode_ac(): void { /*** ghi rc ***/
+private opcode_9c(): void { /*** ghi rc ***/
     this.d = (this.r[0xC] >> 8) & 0xFF;
 }
-private opcode_ad(): void { /*** ghi rd ***/
+private opcode_9d(): void { /*** ghi rd ***/
     this.d = (this.r[0xD] >> 8) & 0xFF;
 }
-private opcode_ae(): void { /*** ghi re ***/
+private opcode_9e(): void { /*** ghi re ***/
     this.d = (this.r[0xE] >> 8) & 0xFF;
 }
-private opcode_af(): void { /*** ghi rf ***/
+private opcode_9f(): void { /*** ghi rf ***/
     this.d = (this.r[0xF] >> 8) & 0xFF;
+}
+private opcode_a0(): void { /*** plo r0 ***/
+    this.r[0x0] = (this.r[0x0] & 0xFF00) | this.d;
+}
+private opcode_a1(): void { /*** plo r1 ***/
+    this.r[0x1] = (this.r[0x1] & 0xFF00) | this.d;
+}
+private opcode_a2(): void { /*** plo r2 ***/
+    this.r[0x2] = (this.r[0x2] & 0xFF00) | this.d;
+}
+private opcode_a3(): void { /*** plo r3 ***/
+    this.r[0x3] = (this.r[0x3] & 0xFF00) | this.d;
+}
+private opcode_a4(): void { /*** plo r4 ***/
+    this.r[0x4] = (this.r[0x4] & 0xFF00) | this.d;
+}
+private opcode_a5(): void { /*** plo r5 ***/
+    this.r[0x5] = (this.r[0x5] & 0xFF00) | this.d;
+}
+private opcode_a6(): void { /*** plo r6 ***/
+    this.r[0x6] = (this.r[0x6] & 0xFF00) | this.d;
+}
+private opcode_a7(): void { /*** plo r7 ***/
+    this.r[0x7] = (this.r[0x7] & 0xFF00) | this.d;
+}
+private opcode_a8(): void { /*** plo r8 ***/
+    this.r[0x8] = (this.r[0x8] & 0xFF00) | this.d;
+}
+private opcode_a9(): void { /*** plo r9 ***/
+    this.r[0x9] = (this.r[0x9] & 0xFF00) | this.d;
+}
+private opcode_aa(): void { /*** plo ra ***/
+    this.r[0xA] = (this.r[0xA] & 0xFF00) | this.d;
+}
+private opcode_ab(): void { /*** plo rb ***/
+    this.r[0xB] = (this.r[0xB] & 0xFF00) | this.d;
+}
+private opcode_ac(): void { /*** plo rc ***/
+    this.r[0xC] = (this.r[0xC] & 0xFF00) | this.d;
+}
+private opcode_ad(): void { /*** plo rd ***/
+    this.r[0xD] = (this.r[0xD] & 0xFF00) | this.d;
+}
+private opcode_ae(): void { /*** plo re ***/
+    this.r[0xE] = (this.r[0xE] & 0xFF00) | this.d;
+}
+private opcode_af(): void { /*** plo rf ***/
+    this.r[0xF] = (this.r[0xF] & 0xFF00) | this.d;
 }
 private opcode_b0(): void { /*** phi r0 ***/
     this.r[0x0] = (this.r[0x0] & 0x00FF) | (this.d << 8);
@@ -730,11 +730,11 @@ private opcode_f0(): void { /*** ldx ***/
 private opcode_f1(): void { /*** or ***/
     this.d = this.d | this.read(this.r[this.x]);
 }
-private opcode_f2(): void { /*** xor ***/
-    this.d = this.d ^ this.read(this.r[this.x]);
-}
-private opcode_f3(): void { /*** and ***/
+private opcode_f2(): void { /*** and ***/
     this.d = this.d & this.read(this.r[this.x]);
+}
+private opcode_f3(): void { /*** xor ***/
+    this.d = this.d ^ this.read(this.r[this.x]);
 }
 private opcode_f4(): void { /*** add ***/
     this.t16 = (this.d)+(this.read(this.r[this.x]))+(0);this.d = this.t16 & 0xFF;this.df = (this.t16 >> 8) & 1;
@@ -754,11 +754,11 @@ private opcode_f8(): void { /*** ldi .1 ***/
 private opcode_f9(): void { /*** ori .1 ***/
     this.d = this.d | this.fetch();
 }
-private opcode_fa(): void { /*** xri .1 ***/
-    this.d = this.d ^ this.fetch();
-}
-private opcode_fb(): void { /*** ani .1 ***/
+private opcode_fa(): void { /*** ani .1 ***/
     this.d = this.d & this.fetch();
+}
+private opcode_fb(): void { /*** xri .1 ***/
+    this.d = this.d ^ this.fetch();
 }
 private opcode_fc(): void { /*** adi .1 ***/
     this.t16 = (this.d)+(this.fetch())+(0);this.d = this.t16 & 0xFF;this.df = (this.t16 >> 8) & 1;

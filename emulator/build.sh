@@ -1,5 +1,5 @@
-cd ../generator
+cd ../processor
 sh build.sh
 cd ../emulator
-rm cosmos
+rm vip
 make

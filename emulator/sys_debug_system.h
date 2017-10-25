@@ -38,7 +38,7 @@
 #define DEBUG_VDURENDER(x)	DBGXRender(x,1)											// Render the game display etc.
 
 #define DEBUG_RESET() 		CPUReset()												// Reset the CPU / Hardware.
-#define DEBUG_HOMEPC()		((CPUGetStatus()->pc) & 0x7FF) 							// Get PC Home Address (e.g. current PCTR value)
+#define DEBUG_HOMEPC()		((CPUGetStatus()->pc) & 0xFFFF) 						// Get PC Home Address (e.g. current PCTR value)
 
 #define DEBUG_SINGLESTEP()	CPUExecuteInstruction()									// Execute a single instruction, return 0 or Frame rate on frame end.
 #define DEBUG_RUN(b1,b2) 	CPUExecute(b1,b2) 										// Run a frame or to breakpoint, returns -1 if breakpoint

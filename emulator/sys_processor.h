@@ -20,6 +20,8 @@ typedef unsigned char  BYTE8;
 
 void CPUReset(void);
 BYTE8 CPUExecuteInstruction(void);
+WORD16 CPUReadMemory(WORD16 address);
+void CPUWriteMemory(WORD16 address,WORD16 data);
 
 #ifdef INCLUDE_DEBUGGING_SUPPORT													// Only required for debugging
 
@@ -32,8 +34,6 @@ typedef struct __CPUSTATUS {
 CPUSTATUS *CPUGetStatus(void);
 BYTE8 CPUExecute(WORD16 breakPoint1,WORD16 breakPoint2);
 WORD16 CPUGetStepOverBreakpoint(void);
-WORD16 CPUReadMemory(WORD16 address);
-void CPUWriteMemory(WORD16 address,WORD16 data);
 void CPULoadBinary(const char *fileName);
 #endif
 #endif

@@ -15,11 +15,18 @@
 #include "hardware.h"
 #include "gfx.h"																
 
+static WORD16 videoAddress = 0x0000;
+static BYTE8 screenOn = 0;
+static BYTE8 keyboardLatch = 0;
+static BYTE8 screenHeight = 32;
+
 // *******************************************************************************************************************************
 //										Hardware Reset
 // *******************************************************************************************************************************
 
 void HWIReset(void) {
+	keyboardLatch = screenOn = videoAddress = 0;
+	screenHeight = 32;
 }
 
 // *******************************************************************************************************************************
@@ -29,3 +36,53 @@ void HWIReset(void) {
 void HWIEndFrame() {
 }
 
+// *******************************************************************************************************************************
+//										Get/Set Video Address
+// *******************************************************************************************************************************
+
+void HWISetVideoAddress(WORD16 vAddr,WORD16 pc) {
+	videoAddress = vAddr;
+	BYTE8 offset = 0;
+	while (offset < 32 && CPUReadMemory(pc+offset) != 0x3C) offset++;	// Hunt for BN1.
+	screenHeight = (offset < 8) ? 64 : 32;
+	//printf("Set %x\n",videoAddress);
+}
+
+WORD16 HWIGetVideoAddress() {
+	//printf("Get %x\n",videoAddress);
+	return videoAddress;
+}
+
+// *******************************************************************************************************************************
+//											Get/Set Screen On
+// *******************************************************************************************************************************
+
+BYTE8 HWIGetScreenOn(void) {
+	return screenOn;
+}
+
+BYTE8 HWISetScreenOn(BYTE8 isOn) {
+	screenOn = isOn;
+	return isOn;
+}
+
+// *******************************************************************************************************************************
+//											Keyboard latch
+// *******************************************************************************************************************************
+
+void HWISetKeyboardLatch(BYTE8 value) {
+	keyboardLatch = value & 0xF;
+}
+
+BYTE8 HWIIsHexKeypadPressed(void) {
+	char c = "0123456789ABCDEF"[keyboardLatch];
+	return GFXIsKeyPressed(c);
+}
+
+// *******************************************************************************************************************************
+//										Get # of display lines
+// *******************************************************************************************************************************
+
+BYTE8 HWIGetDisplayLines(void) {
+	return screenHeight;
+}

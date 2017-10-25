@@ -103,13 +103,13 @@ case 0x32: /*** bz .1 ***/
 case 0x33: /*** bdf .1 ***/
     T8 = FETCH();if (DF != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x34: /*** b1 .1 ***/
-    T8 = FETCH();if (EFLAG(1) != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG1() != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x35: /*** b2 .1 ***/
-    T8 = FETCH();if (EFLAG(2) != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG2() != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x36: /*** b3 .1 ***/
-    T8 = FETCH();if (EFLAG(3) != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG3() != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x37: /*** b4 .1 ***/
-    T8 = FETCH();if (EFLAG(4) != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG4() != 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x38: /*** skp ***/
     T8 = FETCH();break;
 case 0x39: /*** bnq .1 ***/
@@ -119,13 +119,13 @@ case 0x3a: /*** bnz .1 ***/
 case 0x3b: /*** bnf .1 ***/
     T8 = FETCH();if (DF == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x3c: /*** bn1 .1 ***/
-    T8 = FETCH();if (EFLAG(1) == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG1() == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x3d: /*** bn2 .1 ***/
-    T8 = FETCH();if (EFLAG(2) == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG2() == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x3e: /*** bn3 .1 ***/
-    T8 = FETCH();if (EFLAG(3) == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG3() == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x3f: /*** bn4 .1 ***/
-    T8 = FETCH();if (EFLAG(4) == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
+    T8 = FETCH();if (EFLAG4() == 0) { R[P] = (R[P] & 0xFF00) | T8; };break;
 case 0x40: /*** lda r0 ***/
     D = READ(R[0x0]);R[0x0] = (R[0x0]+1) & 0xFFFF;break;
 case 0x41: /*** lda r1 ***/
@@ -193,35 +193,35 @@ case 0x5f: /*** str rf ***/
 case 0x60: /*** irx ***/
     R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x61: /*** out 1 ***/
-    OUTPUT(1,READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
+    OUTPUT1(READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x62: /*** out 2 ***/
-    OUTPUT(2,READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
+    OUTPUT2(READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x63: /*** out 3 ***/
-    OUTPUT(3,READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
+    OUTPUT3(READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x64: /*** out 4 ***/
-    OUTPUT(4,READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
+    OUTPUT4(READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x65: /*** out 5 ***/
-    OUTPUT(5,READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
+    OUTPUT5(READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x66: /*** out 6 ***/
-    OUTPUT(6,READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
+    OUTPUT6(READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x67: /*** out 7 ***/
-    OUTPUT(7,READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
+    OUTPUT7(READ(R[X]));R[X] = (R[X]+1) & 0xFFFF;break;
 case 0x68: /*** i68 ***/
     ;break;
 case 0x69: /*** inp 1 ***/
-    D = INPUT(1);WRITE(R[X],D);break;
+    D = INPUT1();WRITE(R[X],D);break;
 case 0x6a: /*** inp 2 ***/
-    D = INPUT(2);WRITE(R[X],D);break;
+    D = INPUT2();WRITE(R[X],D);break;
 case 0x6b: /*** inp 3 ***/
-    D = INPUT(3);WRITE(R[X],D);break;
+    D = INPUT3();WRITE(R[X],D);break;
 case 0x6c: /*** inp 4 ***/
-    D = INPUT(4);WRITE(R[X],D);break;
+    D = INPUT4();WRITE(R[X],D);break;
 case 0x6d: /*** inp 5 ***/
-    D = INPUT(5);WRITE(R[X],D);break;
+    D = INPUT5();WRITE(R[X],D);break;
 case 0x6e: /*** inp 6 ***/
-    D = INPUT(6);WRITE(R[X],D);break;
+    D = INPUT6();WRITE(R[X],D);break;
 case 0x6f: /*** inp 7 ***/
-    D = INPUT(7);WRITE(R[X],D);break;
+    D = INPUT7();WRITE(R[X],D);break;
 case 0x70: /*** ret ***/
     T8 = READ(R[X]);R[X] = (R[X]+1) & 0xFFFF;X = (T8 >> 4) & 0xF;P = T8 & 0xF;IE = 1;break;
 case 0x71: /*** dis ***/
@@ -286,70 +286,70 @@ case 0x8e: /*** glo re ***/
     D = R[0xE] & 0xFF;break;
 case 0x8f: /*** glo rf ***/
     D = R[0xF] & 0xFF;break;
-case 0x90: /*** plo r0 ***/
-    R[0x0] = (R[0x0] & 0xFF00) | D;break;
-case 0x91: /*** plo r1 ***/
-    R[0x1] = (R[0x1] & 0xFF00) | D;break;
-case 0x92: /*** plo r2 ***/
-    R[0x2] = (R[0x2] & 0xFF00) | D;break;
-case 0x93: /*** plo r3 ***/
-    R[0x3] = (R[0x3] & 0xFF00) | D;break;
-case 0x94: /*** plo r4 ***/
-    R[0x4] = (R[0x4] & 0xFF00) | D;break;
-case 0x95: /*** plo r5 ***/
-    R[0x5] = (R[0x5] & 0xFF00) | D;break;
-case 0x96: /*** plo r6 ***/
-    R[0x6] = (R[0x6] & 0xFF00) | D;break;
-case 0x97: /*** plo r7 ***/
-    R[0x7] = (R[0x7] & 0xFF00) | D;break;
-case 0x98: /*** plo r8 ***/
-    R[0x8] = (R[0x8] & 0xFF00) | D;break;
-case 0x99: /*** plo r9 ***/
-    R[0x9] = (R[0x9] & 0xFF00) | D;break;
-case 0x9a: /*** plo ra ***/
-    R[0xA] = (R[0xA] & 0xFF00) | D;break;
-case 0x9b: /*** plo rb ***/
-    R[0xB] = (R[0xB] & 0xFF00) | D;break;
-case 0x9c: /*** plo rc ***/
-    R[0xC] = (R[0xC] & 0xFF00) | D;break;
-case 0x9d: /*** plo rd ***/
-    R[0xD] = (R[0xD] & 0xFF00) | D;break;
-case 0x9e: /*** plo re ***/
-    R[0xE] = (R[0xE] & 0xFF00) | D;break;
-case 0x9f: /*** plo rf ***/
-    R[0xF] = (R[0xF] & 0xFF00) | D;break;
-case 0xa0: /*** ghi r0 ***/
+case 0x90: /*** ghi r0 ***/
     D = (R[0x0] >> 8) & 0xFF;break;
-case 0xa1: /*** ghi r1 ***/
+case 0x91: /*** ghi r1 ***/
     D = (R[0x1] >> 8) & 0xFF;break;
-case 0xa2: /*** ghi r2 ***/
+case 0x92: /*** ghi r2 ***/
     D = (R[0x2] >> 8) & 0xFF;break;
-case 0xa3: /*** ghi r3 ***/
+case 0x93: /*** ghi r3 ***/
     D = (R[0x3] >> 8) & 0xFF;break;
-case 0xa4: /*** ghi r4 ***/
+case 0x94: /*** ghi r4 ***/
     D = (R[0x4] >> 8) & 0xFF;break;
-case 0xa5: /*** ghi r5 ***/
+case 0x95: /*** ghi r5 ***/
     D = (R[0x5] >> 8) & 0xFF;break;
-case 0xa6: /*** ghi r6 ***/
+case 0x96: /*** ghi r6 ***/
     D = (R[0x6] >> 8) & 0xFF;break;
-case 0xa7: /*** ghi r7 ***/
+case 0x97: /*** ghi r7 ***/
     D = (R[0x7] >> 8) & 0xFF;break;
-case 0xa8: /*** ghi r8 ***/
+case 0x98: /*** ghi r8 ***/
     D = (R[0x8] >> 8) & 0xFF;break;
-case 0xa9: /*** ghi r9 ***/
+case 0x99: /*** ghi r9 ***/
     D = (R[0x9] >> 8) & 0xFF;break;
-case 0xaa: /*** ghi ra ***/
+case 0x9a: /*** ghi ra ***/
     D = (R[0xA] >> 8) & 0xFF;break;
-case 0xab: /*** ghi rb ***/
+case 0x9b: /*** ghi rb ***/
     D = (R[0xB] >> 8) & 0xFF;break;
-case 0xac: /*** ghi rc ***/
+case 0x9c: /*** ghi rc ***/
     D = (R[0xC] >> 8) & 0xFF;break;
-case 0xad: /*** ghi rd ***/
+case 0x9d: /*** ghi rd ***/
     D = (R[0xD] >> 8) & 0xFF;break;
-case 0xae: /*** ghi re ***/
+case 0x9e: /*** ghi re ***/
     D = (R[0xE] >> 8) & 0xFF;break;
-case 0xaf: /*** ghi rf ***/
+case 0x9f: /*** ghi rf ***/
     D = (R[0xF] >> 8) & 0xFF;break;
+case 0xa0: /*** plo r0 ***/
+    R[0x0] = (R[0x0] & 0xFF00) | D;break;
+case 0xa1: /*** plo r1 ***/
+    R[0x1] = (R[0x1] & 0xFF00) | D;break;
+case 0xa2: /*** plo r2 ***/
+    R[0x2] = (R[0x2] & 0xFF00) | D;break;
+case 0xa3: /*** plo r3 ***/
+    R[0x3] = (R[0x3] & 0xFF00) | D;break;
+case 0xa4: /*** plo r4 ***/
+    R[0x4] = (R[0x4] & 0xFF00) | D;break;
+case 0xa5: /*** plo r5 ***/
+    R[0x5] = (R[0x5] & 0xFF00) | D;break;
+case 0xa6: /*** plo r6 ***/
+    R[0x6] = (R[0x6] & 0xFF00) | D;break;
+case 0xa7: /*** plo r7 ***/
+    R[0x7] = (R[0x7] & 0xFF00) | D;break;
+case 0xa8: /*** plo r8 ***/
+    R[0x8] = (R[0x8] & 0xFF00) | D;break;
+case 0xa9: /*** plo r9 ***/
+    R[0x9] = (R[0x9] & 0xFF00) | D;break;
+case 0xaa: /*** plo ra ***/
+    R[0xA] = (R[0xA] & 0xFF00) | D;break;
+case 0xab: /*** plo rb ***/
+    R[0xB] = (R[0xB] & 0xFF00) | D;break;
+case 0xac: /*** plo rc ***/
+    R[0xC] = (R[0xC] & 0xFF00) | D;break;
+case 0xad: /*** plo rd ***/
+    R[0xD] = (R[0xD] & 0xFF00) | D;break;
+case 0xae: /*** plo re ***/
+    R[0xE] = (R[0xE] & 0xFF00) | D;break;
+case 0xaf: /*** plo rf ***/
+    R[0xF] = (R[0xF] & 0xFF00) | D;break;
 case 0xb0: /*** phi r0 ***/
     R[0x0] = (R[0x0] & 0x00FF) | (D << 8);break;
 case 0xb1: /*** phi r1 ***/
@@ -482,10 +482,10 @@ case 0xf0: /*** ldx ***/
     D = READ(R[X]);break;
 case 0xf1: /*** or ***/
     D = D | READ(R[X]);break;
-case 0xf2: /*** xor ***/
-    D = D ^ READ(R[X]);break;
-case 0xf3: /*** and ***/
+case 0xf2: /*** and ***/
     D = D & READ(R[X]);break;
+case 0xf3: /*** xor ***/
+    D = D ^ READ(R[X]);break;
 case 0xf4: /*** add ***/
     T16 = (D)+(READ(R[X]))+(0);D = T16 & 0xFF;DF = (T16 >> 8) & 1;break;
 case 0xf5: /*** sd ***/
@@ -498,10 +498,10 @@ case 0xf8: /*** ldi .1 ***/
     D = FETCH();break;
 case 0xf9: /*** ori .1 ***/
     D = D | FETCH();break;
-case 0xfa: /*** xri .1 ***/
-    D = D ^ FETCH();break;
-case 0xfb: /*** ani .1 ***/
+case 0xfa: /*** ani .1 ***/
     D = D & FETCH();break;
+case 0xfb: /*** xri .1 ***/
+    D = D ^ FETCH();break;
 case 0xfc: /*** adi .1 ***/
     T16 = (D)+(FETCH())+(0);D = T16 & 0xFF;DF = (T16 >> 8) & 1;break;
 case 0xfd: /*** sdi .1 ***/

@@ -85,20 +85,21 @@ void DBGXRender(int *address,int runMode) {
 		GFXString(GRID(5,row),buffer,GRIDSIZE,isPC ? DBGC_HIGHLIGHT:DBGC_DATA,-1);	// Print the mnemonic
 	}
 
-/*
-	p = HWIGetPageAddress();														// wherever the screen is, it's now in R0.
+
+	p = HWIGetVideoAddress();														// wherever the screen is, it's now in R0.
+	int height = HWIGetDisplayLines();
 	SDL_Rect rc;rc.x = _GFXX(21);rc.y = _GFXY(1)/2;									// Whole rectangle.
 	rc.w = 10 * GRIDSIZE * 6;rc.h = 6 *GRIDSIZE * 8; 										
 	if (runMode) {
-		rc.w = 30 * GRIDSIZE * 6;rc.h = 13 * GRIDSIZE * 8;
+		rc.w = 30 * GRIDSIZE * 6;rc.h = 13 * GRIDSIZE * height / 5;
 		rc.x = WIN_WIDTH / 2 - rc.w/2;
 		rc.y = WIN_HEIGHT - 32 - rc.h;
 	}
-	rc.w = rc.w/64*64;rc.h = rc.h/32*32;											// Make it /64 /32
-	SDL_Rect rcPixel;rcPixel.h = rc.h/32;rcPixel.w = rc.w / 64;						// Pixel rectangle.
+	rc.w = rc.w/64*64;rc.h = rc.h/height*height;									// Make it /64 /height
+	SDL_Rect rcPixel;rcPixel.h = rc.h/height;rcPixel.w = rc.w / 64;					// Pixel rectangle.
 	GFXRectangle(&rc,0x0);															// Fill it black
 	if (p != 0xFFFF && HWIGetScreenOn() != 0) {
-		for (int i = 0;i < 256;i++) {
+		for (int i = 0;i < 256*height/32;i++) {
 			int bt = CPUReadMemory(p+i);
 			rcPixel.x = rc.x + rcPixel.w * 8 * (i % 8);								// Horizontal position
 			rcPixel.y = rc.y + i / 8 * rcPixel.h;
@@ -107,6 +108,5 @@ void DBGXRender(int *address,int runMode) {
 				rcPixel.x += rcPixel.w;
 			}			
 		}
-	}
-*/
+	}	
 }	
