@@ -53,16 +53,19 @@ return macro 															; allows subroutine returns to disable/enable interr
 ;
 ;	r15 :	current value on the top of the stack.
 ; 	r14	:	.0 type of value in r15 : 0=constant 1=address of 16 bit LL:HH 2=address of 8 bit.
-;			.1 temporary register
+;			.1 temporary register / holds DF following precalculation
 ;	r13 : 	RPN calculation stack. Starts with lower 4 bits zero ; one dummy value at start
 ;			(r13) points to the LSB of the 2nd stack value, (r13+1) is the MSB. Expands down.
 ;	r12 : 	Code being evaluated
+; 	r11 : 	Code routine address for evaluation.
 
+rxRoutine = 11
 rxCode = 12
 rxRPNStack = 13 
 rxType = 14
 rxTOS = 15
 
+ERR_Underflow = 081h								; Underflow of stack.
 
 Setup:
 	ldi 	000h
@@ -87,7 +90,9 @@ Setup:
 end1:br 	end1
 
 TestCode: 	
-	db		0C4h
+	db		0C2h+5
+	db 		0C2h+1
+	db 		096h
 	db 		000h
 
 	org 	8100h
@@ -115,9 +120,10 @@ __EVMainLoop:
 	sex 	r2 										; use R2 as index for this bit.
 
 	ldn 	rxCode 									; look at next item
-	ani 	080h 									; is it an expression part token ($80-$FF)
-	bnz 	__EVNoExit1 							; if so skip this exit
+	shl 		 									; is it an expression part token ($80-$FF)
+	bdf 	__EVNoExit1 							; if so skip this exit
 
+	ldi 	0 										; return code 0 (no error)
 	inc 	r2 										; at this point we may have an l-expression
 	return 											; so we reenter to make sure it's an r-expression.
 
@@ -159,8 +165,8 @@ __EV8BitIndirection:
 
 __EVIsRExpr:
 	ldn 	rxCode 									; look at next item
-	ani 	080h 									; is it an expression part token ($80-$FF)
-	bnz 	__EVNoExit2 							; if so skip this exit
+	shl 											; is it an expression part token ($80-$FF)
+	bdf 	__EVNoExit2 							; if so skip this exit
 
 	inc 	r2 										; at this point, we *know* we have an r-expr
 	return 											; so we can make it re-entrant
@@ -190,19 +196,98 @@ __EVNoExit2:
 
 	ldi 	0 										; zero the type - most of the values are constants
 	plo 	rxType 									; the exception being variables which are l-exprs.
+	phi 	rxTOS 									; zero TOS.1
+;
+;	Check for short constant C0-FE and long constant FF low high
+;
+	lda 	rxCode 									; read and advance the code pointer.
+	adi 	40h 									; DF set if C0-FF, D is 00-3F
+	bnf 	__EVNotConstant
 
-	; TODO: Handle short constants
-	; TODO: Handle long constants
-	; TODO: Handle variables
-	; TODO: Handle strings.
+	plo 	rxTOS 									; save as top of stack
+	dec 	rxTOS 									; fix up as C0 is -2
+	dec 	rxTOS
+	xri 	3Fh 									; check it was 3F, which is the long constant
+	bnz 	__EVMainLoop
+
+	lda 	rxCode 									; read LSB/MSB in
+	plo 	rxTOS
+	lda 	rxCode
+	phi 	rxTOS
+	br 		__EVMainLoop
+;
+;	It must now be in the range A0-BF. Variable handler.
+;
+__EVNotConstant:
+	adi 	20h										; put into range 00-1F
+	xri 	1Fh 									; if the value was BF it's a string
+	bz 		__EVIsString
+	xri 	1Fh 									; fix back.
+	shl 											; double A
+	plo 	rxTOS 									; point to variable.
+	ldi 	Variables/256
+	phi 	rxTOS
+	inc 	rxType 									; set type to 1 (16 bit indirect)
+	br 		__EVMainLoop
+;
+;	String BF <string> terminated by bit 7 high
+;
+__EVIsString:
+	glo	 	rxCode 									; code pointer = string address
+	plo 	rxTOS
+	ghi 	rxCode
+	phi 	rxTOS
+__EVSkipString:
+	lda 	rxCode
+	shl
+	bnf 	__EVSkipString
+	br 		__EVMainLoop
+
+; ************************************************************************************************
+;
+;			  We have found a Unary Operator (80-8F) or Binary Operator (90-9F)
+;
+; ************************************************************************************************
 
 __EVIsOperator:
-	br 		__EVIsOperator
+	ldn 	rxCode 									; get the code.
+	adi 	70h 									; set DF if it is a binary operator.
+	glo 	rxRPNStack 	 							; look at LS Nibble of RPN Stack
+	ani 	0Fh
+	bz 		__EVStackUnderflow  					; there's not at least one entry.
+	bnf 	__EVDispatch 							; if unary operator, go to dispatch.
 
-	; TODO: Operators.
-	; TODO: Check number of values on stack
-	; TODO: Precalculate subtraction.
-	
+	xri 	0Eh 									; binary operator, so 0E is a bad value
+	bz 		__EVStackUnderflow
+
+	ldn 	rxCode 									; get code.
+	adi 	0FFh - 096h 							; values >= 097 will produce a DF
+	bdf 	__EVDispatch 							; $90-$96 (compares and subtract) all start
+													; with subtraction so we precalculate that.
+	sex 	rxRPNStack 								; now do the subtraction throwing the stack value.
+	glo 	rxTOS
+	sd 															
+	plo 	rxTOS
+	inc 	rxRPNStack
+	ghi 	rxTOS
+	sdb 															
+	phi 	rxTOS
+	inc 	rxRPNStack 	
+
+	ldi 	0 										; put DF into D
+	rshl 
+	phi 	rxType 									; and save in rxType.1 (for comparisons)
+	br 		__EVDispatch 							; go to the dispatcher
+;
+__EVStackUnderflow:
+	ldi 	ERR_Underflow							; fail evaluaition on stack underflow.
+	inc 	r2
+	return 
+
+
+__EVDispatch:
+	br 		__EVDispatch
+
 ;	lrx 	rUtilPC,ASCIIToInteger 										; call the atoi() routine.
 ;	mark
 ;	sep 	rUtilPC

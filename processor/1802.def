@@ -62,8 +62,8 @@ FC 		"ADI .1"				@ADD($D,$fetch(),0)
 
 F5 		"SD"					@ADD($D^0xFF,$read($R[$X]),1)
 FD 		"SDI .1"				@ADD($D^0xFF,$fetch(),1)
-75 		"SD"					@ADD($D^0xFF,$read($R[$X]),$DF)
-7D 		"SDI .1"				@ADD($D^0xFF,$fetch(),$DF)
+75 		"SDB"					@ADD($D^0xFF,$read($R[$X]),$DF)
+7D 		"SDBI .1"				@ADD($D^0xFF,$fetch(),$DF)
 
 F7 		"SM"					@ADD($D,$read($R[$X])^0xFF,1)
 FF 		"SMI .1"				@ADD($D,$fetch()^0xFF,1)

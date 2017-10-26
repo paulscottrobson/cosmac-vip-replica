@@ -355,7 +355,7 @@ private opcode_73(): void { /*** stxd ***/
 private opcode_74(): void { /*** adc ***/
     this.t16 = (this.d)+(this.read(this.r[this.x]))+(this.df);this.d = this.t16 & 0xFF;this.df = (this.t16 >> 8) & 1;
 }
-private opcode_75(): void { /*** sd ***/
+private opcode_75(): void { /*** sdb ***/
     this.t16 = (this.d^0xFF)+(this.read(this.r[this.x]))+(this.df);this.d = this.t16 & 0xFF;this.df = (this.t16 >> 8) & 1;
 }
 private opcode_76(): void { /*** rshr ***/
@@ -379,7 +379,7 @@ private opcode_7b(): void { /*** seq ***/
 private opcode_7c(): void { /*** adci .1 ***/
     this.t16 = (this.d)+(this.fetch())+(this.df);this.d = this.t16 & 0xFF;this.df = (this.t16 >> 8) & 1;
 }
-private opcode_7d(): void { /*** sdi .1 ***/
+private opcode_7d(): void { /*** sdbi .1 ***/
     this.t16 = (this.d^0xFF)+(this.fetch())+(this.df);this.d = this.t16 & 0xFF;this.df = (this.t16 >> 8) & 1;
 }
 private opcode_7e(): void { /*** rshl ***/

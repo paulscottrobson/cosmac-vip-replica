@@ -232,7 +232,7 @@ case 0x73: /*** stxd ***/
     WRITE(R[X],D);R[X] = (R[X]-1) & 0xFFFF;break;
 case 0x74: /*** adc ***/
     T16 = (D)+(READ(R[X]))+(DF);D = T16 & 0xFF;DF = (T16 >> 8) & 1;break;
-case 0x75: /*** sd ***/
+case 0x75: /*** sdb ***/
     T16 = (D^0xFF)+(READ(R[X]))+(DF);D = T16 & 0xFF;DF = (T16 >> 8) & 1;break;
 case 0x76: /*** rshr ***/
     T16 = D | (DF << 8);DF = D & 1;D = (T16 >> 1) & 0xFF;break;
@@ -248,7 +248,7 @@ case 0x7b: /*** seq ***/
     Q = 1;UPDATEQ(1);break;
 case 0x7c: /*** adci .1 ***/
     T16 = (D)+(FETCH())+(DF);D = T16 & 0xFF;DF = (T16 >> 8) & 1;break;
-case 0x7d: /*** sdi .1 ***/
+case 0x7d: /*** sdbi .1 ***/
     T16 = (D^0xFF)+(FETCH())+(DF);D = T16 & 0xFF;DF = (T16 >> 8) & 1;break;
 case 0x7e: /*** rshl ***/
     T16 = (D << 1) | DF;D = T16 & 0xFF;DF = (T16 >> 8) & 1;break;
