@@ -1,0 +1,280 @@
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 1 - 26/10/2017 15:53:44
+
+
+       1/       0 :                     
+       2/       0 : =$2                 r2 = 2
+       3/       0 : =$3                 r3 = 3
+       4/       0 : =$4                 r4 = 4
+       5/       0 :                     
+       6/       0 :                     	cpu 	1802
+       7/       0 :                     
+       8/    8000 :                     	org 	8000h
+       9/    8000 :                     
+      10/    8000 : F8 80               	ldi 	080h
+      11/    8002 : B2                  	phi 	r2
+      12/    8003 : F8 08               	ldi 	008h
+      13/    8005 : A2                  	plo 	r2
+      14/    8006 : E2                  	sex 	r2
+      15/    8007 : D2                  	sep 	r2
+      16/    8008 : 64                  	out 	4
+      17/    8009 : 00                  	idl
+      18/    800A :                     
+      19/    800A : E2                  	sex 	r2
+      20/    800B : F8 80               	ldi 	s1/256
+      21/    800D : B4                  	phi	 	r4
+      22/    800E : F8 12               	ldi 	s1&255
+      23/    8010 : A4                  	plo 	r4
+      24/    8011 : D4                  	sep 	r4
+      25/    8012 :                     
+      26/    8012 :                     s1:
+      27/    8012 : F8 01               	ldi 	01
+      28/    8014 : B2                  	phi 	r2
+      29/    8015 : F8 00               	ldi 	00
+      30/    8017 : A2                  	plo 	r2
+      31/    8018 :                     
+      32/    8018 : =D00H               Variables = 0D00h
+      33/    8018 :                     
+      34/    8018 :                     return macro 															; allows subroutine returns to disable/enable interrupts as you want.
+      35/    8018 :                     	dis 																; this program uses MARK-subroutines
+      36/    8018 :                     		endm
+      37/    8018 :                     
+      38/    8018 :                     ;
+      39/    8018 :                     ;	$80-$8F 	Operators : $80:@  $81:?  $82:~  $83:!
+      40/    8018 :                     ;				(Unary)
+      41/    8018 :                     ; 	$90-$9F 	Operators : $90:== $91:!= $92:<  $93: >= $94:<= $95:> $96:- $97:+ 
+      42/    8018 :                     ;				(Binary)	$98:*  $99:/  $9A:%  $9B: &  $9C:|  $9D:^ 
+      43/    8018 :                     ;							
+      44/    8018 :                     ;	$A0-$BE 	Variable. Value is 2 * offset + Variables, type is 16 bit address
+      45/    8018 :                     ;
+      46/    8018 :                     ;	$BF 		A string constant. String constants are ended by bit 7 being set to '1'.
+      47/    8018 :                     ;
+      48/    8018 :                     ;	$C0-$FE 	Represents constant values from -2 to 60
+      49/    8018 :                     ;
+      50/    8018 :                     ;	$FF hh ll 	Constant value outside the C0..FE range
+      51/    8018 :                     ;
+      52/    8018 :                     
+      53/    8018 :                     ;
+      54/    8018 :                     ;	r15 :	current value on the top of the stack.
+      55/    8018 :                     ; 	r14	:	.0 type of value in r15 : 0=constant 1=address of 8 bit 2=address of 16 bit LL HH
+      56/    8018 :                     ;			.1 temporary register
+      57/    8018 :                     ;	r13 : 	RPN calculation stack. Starts with lower 4 bits zero ; one dummy value at start
+      58/    8018 :                     ;			(r13) points to the LSB of the 2nd stack value, (r13+1) is the MSB. Expands down.
+      59/    8018 :                     ;	r12 : 	Code being evaluated
+      60/    8018 :                     
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 2 - 26/10/2017 15:53:44
+
+
+      61/    8018 : =CH                 rxCode = 12
+      62/    8018 : =DH                 rxRPNStack = 13 
+      63/    8018 : =EH                 rxType = 14
+      64/    8018 : =FH                 rxTOS = 15
+      65/    8018 :                     
+      66/    8018 :                     
+      67/    8018 :                     Setup:
+      68/    8018 : F8 00               	ldi 	000h
+      69/    801A : BD                  	phi 	rxRPNStack
+      70/    801B : F8 10               	ldi 	010h
+      71/    801D : AD                  	plo 	rxRPNStack
+      72/    801E :                     
+      73/    801E : F8 80               	ldi 	TestCode/256
+      74/    8020 : BC                  	phi	 	rxCode
+      75/    8021 : F8 2F               	ldi 	TestCode&255
+      76/    8023 : AC                  	plo 	rxCode
+      77/    8024 :                     
+      78/    8024 : F8 81               	ldi 	Evaluate/256
+      79/    8026 : B3                  	phi 	r3
+      80/    8027 : F8 00               	ldi 	Evaluate&255
+      81/    8029 : A3                  	plo 	r3
+      82/    802A :                     
+      83/    802A : 79                  	mark
+      84/    802B : D3                  	sep 	r3
+      85/    802C : 22                  	dec 	r2
+      86/    802D :                     
+      87/    802D : 30 2D               end1:br 	end1
+      88/    802F :                     
+      89/    802F :                     TestCode: 	
+      90/    802F : C4                  	db		0C4h
+      91/    8030 : 00                  	db 		000h
+      92/    8031 :                     
+      93/    8100 :                     	org 	8100h
+      94/    8100 :                     
+      95/    8100 :                     ; ************************************************************************************************
+      96/    8100 :                     ;
+      97/    8100 :                     ;	Set up the 'dummy' stack top value, constant zero.
+      98/    8100 :                     ;
+      99/    8100 :                     ; ************************************************************************************************
+     100/    8100 :                     
+     101/    8100 :                     Evaluate:
+     102/    8100 : F8 00               	ldi 	0 										; First up, put a dummy value in for the current TOS
+     103/    8102 : AF                  	plo 	rxTOS									; which is zero, constant type zero.
+     104/    8103 : BF                  	phi 	rxTOS
+     105/    8104 : AE                  	plo 	rxType
+     106/    8105 :                     
+     107/    8105 :                     ; ************************************************************************************************
+     108/    8105 :                     ;
+     109/    8105 :                     ;	Main Loop Here. If the following item is not part of an expression, we return, but
+     110/    8105 :                     ; 	possibly with a L-Expression in rxTOS/rxType. If we want an r-expr we can re-enter.
+     111/    8105 :                     ;
+     112/    8105 :                     ; ************************************************************************************************
+     113/    8105 :                     
+     114/    8105 :                     __EVMainLoop:
+     115/    8105 : E2                  	sex 	r2 										; use R2 as index for this bit.
+     116/    8106 :                     
+     117/    8106 : 0C                  	ldn 	rxCode 									; look at next item
+     118/    8107 : FA 80               	ani 	080h 									; is it an expression part token ($80-$FF)
+     119/    8109 : 3A 0D               	bnz 	__EVNoExit1 							; if so skip this exit
+     120/    810B :                     
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 3 - 26/10/2017 15:53:44
+
+
+     121/    810B : 12                  	inc 	r2 										; at this point we may have an l-expression
+     122/    810C : (MACRO)             	return 											; so we reenter to make sure it's an r-expression.
+     122/    810C : 71                          dis                                                                                                                             ; this program uses MARK-subroutines
+     123/    810D :                     
+     124/    810D :                     ; ************************************************************************************************
+     125/    810D :                     ;
+     126/    810D :                     ;	If the current value in the TOS registers is an 8 or 16 bit indirection, do that look up.
+     127/    810D :                     ;
+     128/    810D :                     ; ************************************************************************************************
+     129/    810D :                     
+     130/    810D :                     __EVNoExit1:
+     131/    810D : 8E                  	glo 	rxType 									; if type is zero, no indirection required.
+     132/    810E : 32 25               	bz 		__EVIsRExpr
+     133/    8110 : FB 01               	xri 	1 										; if type is one, it's an 8 bit indirection.
+     134/    8112 : 32 1F               	bz 		__EV8BitIndirection
+     135/    8114 :                     
+     136/    8114 : 4F                  	lda 	rxTOS 									; read the low byte. 
+     137/    8115 : AE                  	plo 	rxType
+     138/    8116 : 0F                  	ldn 	rxTOS 									; read high
+     139/    8117 : BF                  	phi 	rxTOS 									; copy into rTOS
+     140/    8118 : 8E                  	glo 	rxType
+     141/    8119 : AF                  	plo 	rxTOS
+     142/    811A : F8 00               	ldi 	0
+     143/    811C : AE                  	plo 	rxType
+     144/    811D : 30 25               	br 		__EVIsRExpr
+     145/    811F :                     
+     146/    811F :                     __EV8BitIndirection:
+     147/    811F : 0F                  	ldn 	rxTOS 									; byte read
+     148/    8120 : AF                  	plo 	rxTOS 									; put in low byte
+     149/    8121 : F8 00               	ldi 	0
+     150/    8123 : BF                  	phi 	rxTOS 									; zero high byte and type.
+     151/    8124 : AE                  	plo 	rxType
+     152/    8125 :                     
+     153/    8125 :                     ; ************************************************************************************************
+     154/    8125 :                     ;
+     155/    8125 :                     ;	We now have an R-Expr in the TOS registers. If we've reached the end of the expression
+     156/    8125 :                     ; 	tokens, we can now exit with that.
+     157/    8125 :                     ;
+     158/    8125 :                     ; ************************************************************************************************
+     159/    8125 :                     
+     160/    8125 :                     __EVIsRExpr:
+     161/    8125 : 0C                  	ldn 	rxCode 									; look at next item
+     162/    8126 : FA 80               	ani 	080h 									; is it an expression part token ($80-$FF)
+     163/    8128 : 3A 2E               	bnz 	__EVNoExit2 							; if so skip this exit
+     164/    812A :                     
+     165/    812A : 12                  	inc 	r2 										; at this point, we *know* we have an r-expr
+     166/    812B : (MACRO)             	return 											; so we can make it re-entrant
+     166/    812B : 71                          dis                                                                                                                             ; this program uses MARK-subroutines
+     167/    812C : 30 00               	br 		Evaluate
+     168/    812E :                     
+     169/    812E :                     ; ************************************************************************************************
+     170/    812E :                     ;
+     171/    812E :                     ;	Now we have either operators or values. Firstly we do values. We have a new value, so we
+     172/    812E :                     ;	push the old TOS value, now an r-expr definitely, on the stack, and get a new value in the
+     173/    812E :                     ; 	TOS *registers*.
+     174/    812E :                     ;
+     175/    812E :                     ;	There are four values : a variable, a short constant, a long constant, and a bit7 string.
+     176/    812E :                     ;
+     177/    812E :                     ; ************************************************************************************************
+     178/    812E :                     
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 4 - 26/10/2017 15:53:44
+
+
+     179/    812E :                     __EVNoExit2:
+     180/    812E : 0C                  	ldn 	rxCode 									; look at next item
+     181/    812F : FC 60               	adi 	060h 									; DF will be set for A0-FF which are values.
+     182/    8131 : 3B 33               	bnf 	__EVIsOperator
+     183/    8133 :                     
+     184/    8133 :                     	; TODO: Constants ; push TOS onto actual stack and get new TOS ($A0 - $FF)
+     185/    8133 :                     
+     186/    8133 :                     
+     187/    8133 :                     __EVIsOperator:
+     188/    8133 : 30 33               	br 		__EVIsOperator
+     189/    8135 :                     
+     190/    8135 :                     	; TODO: Operators.
+     191/    8135 :                     
+     192/    8135 :                     ;	lrx 	rUtilPC,ASCIIToInteger 										; call the atoi() routine.
+     193/    8135 :                     ;	mark
+     194/    8135 :                     ;	sep 	rUtilPC
+     195/    8135 :                     ;	dec 	r2 		
+     196/    8135 :                     
+     197/    8135 :                     ;  	sex 	r2
+     198/    8135 :                     ;	inc 	r2
+     199/    8135 :                     ; 	return
+     200/    8135 :                     
+     201/    8135 :                     ;
+     202/    8135 :                     ;
+     203/    8135 :                     ;return macro 															; allows subroutine returns to disable/enable interrupts as you want.
+     204/    8135 :                     ;	dis 																; this program uses MARK-subroutines
+     205/    8135 :                     ;	endm
+     206/    8135 :                     
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 5 - 26/10/2017 15:53:44
+
+
+  symbol table (* = unused):
+  ------------------------
+
+*ARCHITECTURE :                                        x86_64-unknown-linux - |
+*BIGENDIAN :                      0 - | *BRANCHEXT :                      0 - |
+*CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
+*DATE :                  26/10/2017 - |  END1 :                        802D C |
+ EVALUATE :                    8100 C | *FALSE :                          0 - |
+*FULLPMMU :                       1 - | *HAS64 :                          1 - |
+*HASDSP :                         0 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INEXTMODE :                      0 - |
+*INLWORDMODE :                    0 - | *INMAXMODE :                      0 - |
+*INSRCMODE :                      0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         1 - |
+*MOMCPU :                      1802 - | *MOMCPUNAME :                  1802 - |
+*NESTMAX :                      100 - | *PACKING :                        0 - |
+*PADDING :                        1 - |  R2 :                             2 - |
+ R3 :                             3 - |  R4 :                             4 - |
+*RELAXED :                        0 - |  RXCODE :                         C - |
+ RXRPNSTACK :                     D - |  RXTOS :                          F - |
+ RXTYPE :                         E - |  S1 :                          8012 C |
+*SETUP :                       8018 C |  TESTCODE :                    802F C |
+*TIME :                    15:53:44 - | *TRUE :                           1 - |
+*VARIABLES :                    D00 - | *VERSION :                     142F - |
+ __EV8BITINDIRECTION :         811F C |  __EVISOPERATOR :              8133 C |
+ __EVISREXPR :                 8125 C | *__EVMAINLOOP :                8105 C |
+ __EVNOEXIT1 :                 810D C |  __EVNOEXIT2 :                 812E C |
+
+     47 symbols
+     31 unused symbols
+
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 6 - 26/10/2017 15:53:44
+
+
+  defined macros:
+  ---------------
+
+RETURN                                |
+
+      1 macro
+
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 7 - 26/10/2017 15:53:44
+
+
+  codepages:
+  ----------
+
+STANDARD (0 changed characters)
+
+
+0.00 seconds assembly time
+
+    206 lines source file
+    208 lines incl. macro expansions
+      2 passes
+      0 errors
+      0 warnings

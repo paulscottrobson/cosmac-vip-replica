@@ -200,7 +200,7 @@ WORD16 CPUGetStepOverBreakpoint(void) {
 
 void CPULoadBinary(const char *fileName) {
 	FILE *f = fopen(fileName,"rb");
-	fread(RAM,1,32768,f);
+	fread(ROM,1,32768,f);
 	fclose(f);
 }
 

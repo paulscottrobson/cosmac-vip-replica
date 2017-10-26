@@ -1,0 +1,258 @@
+
+r2 = 2
+
+
+	cpu 	1802
+
+	org 	8000h
+
+	ldi 	080h
+	phi 	r2
+	ldi 	008h
+	plo 	r2
+	sex 	r2
+	sep 	r2
+	out 	4
+	idl
+
+Variables = 0D00h
+
+;
+;	Evaluator.
+;
+;	80-8F 		unary operators 		@ ?
+; 	90-9F 		binary operators 		; >= > <= < == != - + * / %
+; 	A0-BE 		variables @,A-Z
+;	BF 			String. 
+;	C0-FE 		constants -2 to 60
+; 	FF ll hh 	other constants.
+
+;
+rTOS = 15 								; top of stack value or address
+rType = 14 								; (.0) 0 = constant, 1 = 8 bit address, 2 = 16 bit address.
+rStack = 13 							; points to stack top LSB of top most item if any. Low nibble = $0 implies empty
+rCode = 12 								; code being evaluated.
+rTemp = 11 								; used for branching.
+
+rRunning = 2 							; what it runs in.
+
+	ldi 	0Eh
+	phi 	rStack
+	ldi 	00h
+	plo 	rStack
+	ldi 	Code / 256
+	phi 	rCode
+	ldi 	Code & 255
+	plo 	rCode
+	lbr 	Evaluator
+
+
+Code:
+	db 		0FFh,01h,80h
+	db 		81h
+	db 		0C3h
+	db 		0h
+
+	org 	8100h
+Evaluator:	
+	ldi 	0 							; put a constant 0 on the top of the stack to work with.
+	plo 	rTOS 						; just a dummy.
+	phi 	rTOS
+	plo 	rType
+
+EvaluatorLoop:
+	ldn 	rCode 						; only continue if it is $80-$FF
+	ani 	80h 						; of course, it may not be completed here, rType could
+	bz 		EvaluatorExit 				; be non-zero if an L-EXPR.
+
+	glo 	rType 						; if type is zero, it's a value already rather than
+	bz 		__EVTOSNormalised 			; an address of one.
+	xri  	1 							; if it is 1
+	bz 		__EVByteAccess 				; then it is a byte address.
+
+	lda 	rTOS 						; read the low byte 
+	plo 	rType
+	ldn 	rTOS 						; read the high byte
+	phi 	rTOS 						; copy into TOS
+	glo 	rType 						; retrieve the low byte
+	plo		rTOS 						; copy that.
+	br 		__EVClearType 				; go to clear-type flag
+;
+__EVByteAccess:
+	ldn 	rTOS 						; read low byte
+	plo 	rTOS 						; put in TOS
+	ldi 	0 							; zero high byte
+	phi 	rTOS
+;
+__EVClearType:
+	ldi 	0 							; set the type to zero, it is now an actual value.
+	plo 	rType
+;
+;	If the next element is a constant (e.g. number, variable string) push the current register
+; 	TOS on the stack, and put the constant or variable on appropriately typed.
+;
+__EVTOSNormalised:
+	ldn 	rCode 						; read the next byte.
+	adi 	060h 						; $A0 - $FF are values of various sorts
+	bnf 	__EVIsOperator 				; others must be operators.
+
+	dec 	rStack 						; push the current TOS value onto the actual stack.
+	ghi 	rTOS
+	str 	rStack
+	dec 	rStack
+	glo 	rTOS
+	str 	rStack
+
+	ldn 	rCode 						; check if code is $FF which is the 3 byte ll hh value.
+	xri 	0FFh
+	bz 		__EVIsLongConstant
+	ldn 	rCode 						; look again
+	adi 	040h 						; DF set if C0-FE and D contains constant.
+	bdf 	__EVIsShortConstant
+
+	adi 	020h 						; must have been a variable address or string
+	xri 	01Fh
+	bz 		__EVIsString 				; $1F is string
+	xri 	01Fh 						; fix it back.
+	shl 								; double it
+	plo 	rTOS
+	ldi 	Variables/256 				; point TOS.1 to variables 
+	phi 	rTOS
+	ldi 	2							; it's a 16 bit address
+	plo 	rType
+	inc 	rCode 						; skip over the byte.
+	br 		EvaluatorLoop 				; go round again.
+;
+;	String. Return address as constant.
+;	
+__EVIsString:
+	inc 	rCode 						; step over initial $BF.
+	glo 	rCode 						; copy address to TOS
+	plo 	rTOS
+	ghi 	rCode
+	phi 	rTOS
+	ldi  	0							; set type as constant.
+	plo 	rType
+__EVSkipString:
+	lda 	rCode 						; keep skipping until bit 7 high found, end of string.
+	ani 	080h
+	bz 		__EVSkipString
+	br 		EvaluatorLoop
+;
+;	Handles $C0-$FE short constant.
+;
+__EVIsShortConstant:
+	plo 	rTOS 						; save the value
+	ldi 	0 	
+	phi 	rTOS 						; zero the MSB
+	plo	 	rType 						; it's a constant.
+	dec 	rTOS 						; fix up for the -2 start
+	dec 	rTOS
+	inc 	rCode 						; skip over the byte.
+	br 		EvaluatorLoop 				; go round again.
+;
+;	Handles $FF <low> <high> long constant.
+;
+__EVIsLongConstant:
+	plo 	rType 						; D is zero, so we can set the type using D
+	inc 	rCode 						; skip over the $FF
+	lda 	rCode 						; load in the constant
+	plo 	rTOS
+	lda 	rCode
+	phi 	rTOS
+	br 		EvaluatorLoop 				; go round again.
+;
+;	Operator.
+;
+__EVIsOperator:
+	glo 	rStack 						; check at least one value on the stack.
+	ani 	0Fh 
+	bz 		EvaluatorError
+
+	ldn 	rCode 						; fetch the operator
+	adi 	70h 						; DF will be set and D will be operator if binary $90-$9F
+	bnf 	__EVDoOperator
+
+	glo 	rStack 						; get stack
+	ani 	0Fh
+	adi 	0F3h 						; > $xC will cause DF
+	bdf 	EvaluatorError
+
+	ldn 	rCode 						; get code
+	ani 	0Fh 
+	smi 	7 							; the first 7 all involve subtraction (6 compare and subtract)
+	bdf 	__EVDoOperator 				; so we do the subtraction and save DF in rType.High
+
+	glo 	rTOS 						; do the actual subtraction and dump one stack level.
+	sex 	rStack
+	sd
+	plo 	rTOS
+	inc 	rStack
+	ghi 	rTOS
+	sdb 
+	phi 	rTOS
+	inc 	rStack
+
+	ldi 	0							; 
+	plo		rType 						; zeroing rType in passing as its a number not a pointer.
+
+__EVDoOperator:
+	lda 	rCode 						; reget operator and step over it.
+	ani 	1Fh 						; offset from operator base $80h
+	shl 								; offset into table
+	adi 	EVOperatorTable & 255 		; point rTemp into the table.
+	plo 	rTemp
+	ldi 	EVOperatorTable / 256 		
+	phi 	rTemp
+	lda 	rTemp 						; get high byte
+	phi 	rType 						; save temp
+	ldn 	rTemp 						; get low byte
+	plo 	rTemp 						; put address into rTemp
+	ghi 	rType
+	phi 	rTemp 					
+	sep 	rTemp 						; run the operator in there
+	br 		EvaluatorLoop 				; and loop round.
+halt:br 	halt
+
+EvaluatorExit:
+EvaluatorError:
+	br 		EvaluatorError
+
+;
+;	Operator vector table.
+;
+EVOperatorTable:
+	dw 		EV16Indirect 				; @ 	$80
+	dw 		EV8Indirect 				; ! 	$81
+	dw 		0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; 14 unused values
+	dw 		0 							; == 	$90
+	dw 		0 							; != 	$91
+	dw 		0 							; >=  	$92
+	dw 		0 							; < 	$93
+	dw 		0 							; < 	$94
+	dw 		0 							; >= 	$95
+	dw 		EVSubtraction 				; - 	$96 (already done subtraction)
+	dw 		EVAddition 					; +		$97
+	dw 		0 							; * 	$98
+	dw 		0 							; / 	$99
+	dw 		0 							; % 	$9A
+	dw 		0,0,0,0,0 					; 5 unused values
+
+EVAddition: 							; addition.
+	glo 	rTOS
+	sex 	rStack
+	add
+	plo 	rTOS
+	inc 	rStack
+	ghi 	rTOS
+	adc
+	phi 	rTOS
+	inc 	rStack
+EVSubtraction:
+	sep 	rRunning 					; exit immediately.
+
+EV16Indirect: 							; we just set the type to 8 or 16 bit read.
+	inc 	rType 				
+EV8Indirect:
+	inc 	rType 	
+	sep 	rRunning
