@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 1 - 26/10/2017 18:47:01
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 1 - 27/10/2017 9:02:18
 
 
        1/       0 :                     
@@ -56,12 +56,12 @@
       53/    8018 :                     ;
       54/    8018 :                     ;	r15 :	current value on the top of the stack.
       55/    8018 :                     ; 	r14	:	.0 type of value in r15 : 0=constant 1=address of 16 bit LL:HH 2=address of 8 bit.
-      56/    8018 :                     ;			.1 temporary register / holds DF following precalculation
+      56/    8018 :                     ;			.1 temporary register
       57/    8018 :                     ;	r13 : 	RPN calculation stack. Starts with lower 4 bits zero ; one dummy value at start
       58/    8018 :                     ;			(r13) points to the LSB of the 2nd stack value, (r13+1) is the MSB. Expands down.
       59/    8018 :                     ;	r12 : 	Code being evaluated
       60/    8018 :                     ; 	r11 : 	Code routine address for evaluation.
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 2 - 26/10/2017 18:47:01
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 2 - 27/10/2017 9:02:18
 
 
       61/    8018 :                     
@@ -96,11 +96,11 @@
       90/    802D : 30 2D               end1:br 	end1
       91/    802F :                     
       92/    802F :                     TestCode: 	
-      93/    802F : C7                  	db		0C2h+5
-      94/    8030 : C3                  	db 		0C2h+1
-      95/    8031 : 96                  	db 		096h
-      96/    8032 : 00                  	db 		000h
-      97/    8033 :                     
+      93/    802F : FF 81 04            	db 		0FFh,081h,4
+      94/    8032 : FF 82 01            	db		0FFh,082h,1
+      95/    8035 : 96                  	db 		096h
+      96/    8036 : 00                  	db 		000h
+      97/    8037 :                     
       98/    8100 :                     	org 	8100h
       99/    8100 :                     
      100/    8100 :                     ; ************************************************************************************************
@@ -124,7 +124,7 @@
      118/    8105 :                     
      119/    8105 :                     __EVMainLoop:
      120/    8105 : E2                  	sex 	r2 										; use R2 as index for this bit.
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 3 - 26/10/2017 18:47:01
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 3 - 27/10/2017 9:02:18
 
 
      121/    8106 :                     
@@ -187,7 +187,7 @@
      176/    812E :                     ;
      177/    812E :                     ;	Now we have either operators or values. Firstly we do values. We have a new value, so we
      178/    812E :                     ;	push the old TOS value, now an r-expr definitely, on the stack, and get a new value in the
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 4 - 26/10/2017 18:47:01
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 4 - 27/10/2017 9:02:18
 
 
      179/    812E :                     ; 	TOS *registers*.
@@ -250,7 +250,7 @@
      236/    815F : 8C                  	glo	 	rxCode 									; code pointer = string address
      237/    8160 : AF                  	plo 	rxTOS
      238/    8161 : 9C                  	ghi 	rxCode
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 5 - 26/10/2017 18:47:01
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 5 - 27/10/2017 9:02:18
 
 
      239/    8162 : BF                  	phi 	rxTOS
@@ -281,7 +281,7 @@
      264/    8178 : FC 69               	adi 	0FFh - 096h 							; values >= 097 will produce a DF
      265/    817A : 33 8F               	bdf 	__EVDispatch 							; $90-$96 (compares and subtract) all start
      266/    817C :                     													; with subtraction so we precalculate that.
-     267/    817C : ED                  	sex 	rxRPNStack
+     267/    817C : ED                  	sex 	rxRPNStack 								; now do the subtraction throwing the stack value.
      268/    817D : 8F                  	glo 	rxTOS
      269/    817E : F5                  	sd 															
      270/    817F : AF                  	plo 	rxTOS
@@ -294,38 +294,169 @@
      277/    8185 : F8 00               	ldi 	0 										; put DF into D
      278/    8187 : 7E                  	rshl 
      279/    8188 : BE                  	phi 	rxType 									; and save in rxType.1 (for comparisons)
-     280/    8189 :                     
-     281/    8189 : 30 8F               	br 		__EVDispatch 							; go to the dispatcher
-     282/    818B :                     
-     283/    818B :                     __EVStackUnderflow:
-     284/    818B : F8 81               	ldi 	ERR_Underflow							; fail evaluaition on stack underflow.
-     285/    818D : 12                  	inc 	r2
-     286/    818E : (MACRO)             	return 
-     286/    818E : 71                          dis                                                                                                                             ; this program uses MARK-subroutines
-     287/    818F :                     
-     288/    818F :                     
-     289/    818F :                     __EVDispatch:
-     290/    818F : 30 8F               	br 		__EVDispatch
-     291/    8191 :                     
-     292/    8191 :                     ;	lrx 	rUtilPC,ASCIIToInteger 										; call the atoi() routine.
-     293/    8191 :                     ;	mark
-     294/    8191 :                     ;	sep 	rUtilPC
-     295/    8191 :                     ;	dec 	r2 		
-     296/    8191 :                     
-     297/    8191 :                     ;  	sex 	r2
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 6 - 26/10/2017 18:47:01
+     280/    8189 : 30 8F               	br 		__EVDispatch 							; go to the dispatcher
+     281/    818B :                     ;
+     282/    818B :                     __EVStackUnderflow:
+     283/    818B : F8 81               	ldi 	ERR_Underflow							; fail evaluaition on stack underflow.
+     284/    818D : 12                  	inc 	r2
+     285/    818E : (MACRO)             	return 
+     285/    818E : 71                          dis                                                                                                                             ; this program uses MARK-subroutines
+     286/    818F :                     
+     287/    818F :                     ; ************************************************************************************************
+     288/    818F :                     ;
+     289/    818F :                     ;							Actually execute a unary/binary operand
+     290/    818F :                     ;
+     291/    818F :                     ; ************************************************************************************************
+     292/    818F :                     
+     293/    818F :                     __EVDispatch:
+     294/    818F : 4C                  	lda 	rxCode 									; get the code again, and skip it.
+     295/    8190 : FE                  	shl 											; double it, also losing bit 7.
+     296/    8191 : FC A3               	adi 	__EVDispatchTable&255
+     297/    8193 : AB                  	plo 	rxRoutine 								; make rxRoutine point into the table
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 6 - 27/10/2017 9:02:18
 
 
-     298/    8191 :                     ;	inc 	r2
-     299/    8191 :                     ; 	return
-     300/    8191 :                     
-     301/    8191 :                     ;
-     302/    8191 :                     ;
-     303/    8191 :                     ;return macro 															; allows subroutine returns to disable/enable interrupts as you want.
-     304/    8191 :                     ;	dis 																; this program uses MARK-subroutines
-     305/    8191 :                     ;	endm
-     306/    8191 :                     
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 7 - 26/10/2017 18:47:01
+     298/    8194 : F8 81               	ldi 	__EVDispatchTable/256 	
+     299/    8196 : BB                  	phi 	rxRoutine
+     300/    8197 : 4B                  	lda 	rxRoutine 								; read high byte
+     301/    8198 : BE                  	phi 	rxType
+     302/    8199 : 0B                  	ldn 	rxRoutine 								; read low byte and fix up
+     303/    819A : AB                  	plo 	rxRoutine
+     304/    819B : 9E                  	ghi 	rxType
+     305/    819C : BB                  	phi	 	rxRoutine
+     306/    819D :                     
+     307/    819D : E2                  	sex 	r2 										; call the routine
+     308/    819E : 79                  	mark
+     309/    819F : DB                  	sep 	rxRoutine
+     310/    81A0 : 22                  	dec 	r2	
+     311/    81A1 : 30 05               	br 		__EVMainLoop 							; go round again.
+     312/    81A3 :                     
+     313/    81A3 :                     ; ************************************************************************************************
+     314/    81A3 :                     ;
+     315/    81A3 :                     ;	Vectors for operators. Note that the ASL assembler outputs this data in
+     316/    81A3 :                     ;	high/low order.
+     317/    81A3 :                     ;
+     318/    81A3 :                     ; ************************************************************************************************
+     319/    81A3 :                     
+     320/    81A3 :                     __EVDispatchTable:
+     321/    81A3 : 00 00               	dw 		0 										; $80 @
+     322/    81A5 : 00 00               	dw 		0 										; $81 ?
+     323/    81A7 : 00 00               	dw 		0 										; $82 ~
+     324/    81A9 : 00 00               	dw 		0 										; $83 !
+     325/    81AB : 00 00 00 00 00 00   	dw 		0,0,0,0,0,0,0,0,0,0,0,0 				; $84-$8F are unused.
+                    00 00 00 00 00 00 
+                    00 00 00 00 00 00 
+                    00 00 00 00 00 00 
+     326/    81C3 : 00 00               	dw 		0 										; $90 == (these are precalculated)
+     327/    81C5 : 00 00               	dw 		0 										; $91 !=
+     328/    81C7 : 00 00               	dw 		0 										; $92 <
+     329/    81C9 : 00 00               	dw 		0 										; $93 >=
+     330/    81CB : 00 00               	dw 		0 										; $94 <=
+     331/    81CD : 00 00               	dw 		0 										; $95 >
+     332/    81CF : 81 EC               	dw 		__EVSubtract 							; $96 - (which is already done)
+     333/    81D1 : 81 E3               	dw 		__EVAdd 								; $97 +
+     334/    81D3 : 00 00               	dw 		0 										; $98 *
+     335/    81D5 : 00 00               	dw 		0 										; $99 /
+     336/    81D7 : 00 00               	dw 		0 										; $9A %
+     337/    81D9 : 00 00               	dw 		0 										; $9B &
+     338/    81DB : 00 00               	dw 		0 										; $9C |
+     339/    81DD : 00 00               	dw 		0 										; $9D ^
+     340/    81DF : 00 00 00 00         	dw 		0,0										; $9E-$9F are unused.
+     341/    81E3 :                     
+     342/    81E3 :                     ; ************************************************************************************************
+     343/    81E3 :                     ;
+     344/    81E3 :                     ;	16 bit Addition
+     345/    81E3 :                     ;
+     346/    81E3 :                     ; ************************************************************************************************
+     347/    81E3 :                     
+     348/    81E3 :                     __EVAdd:
+     349/    81E3 : ED                  	sex 	rxRPNStack 								; Addition of TOS + (stack)
+     350/    81E4 : 8F                  	glo 	rxTOS
+     351/    81E5 : F4                  	add
+     352/    81E6 : AF                  	plo 	rxTOS
+     353/    81E7 : 1D                  	inc 	rxRPNStack
+     354/    81E8 : 9F                  	ghi 	rxTOS
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 7 - 27/10/2017 9:02:18
+
+
+     355/    81E9 : 74                  	adc
+     356/    81EA : BF                  	phi 	rxTOS
+     357/    81EB : 1D                  	inc  	rxRPNStack 								; and fall through, subtraction precalculated
+     358/    81EC :                     
+     359/    81EC :                     ; ************************************************************************************************
+     360/    81EC :                     ;
+     361/    81EC :                     ;	16 bit Subtraction
+     362/    81EC :                     ;
+     363/    81EC :                     ; ************************************************************************************************
+     364/    81EC :                     
+     365/    81EC :                     __EVOpExit1:		
+     366/    81EC :                     __EVSubtract: 										; Subtraction is precalculated so do nothing.
+     367/    81EC : E2                  	sex 	r2
+     368/    81ED : 12                  	inc 	r2
+     369/    81EE : (MACRO)             	return
+     369/    81EE : 71                          dis                                                                                                                             ; this program uses MARK-subroutines
+     370/    81EF :                     
+     371/    81EF :                     ; ************************************************************************************************
+     372/    81EF :                     ;
+     373/    81EF :                     ;	16 bit Bitwise AND
+     374/    81EF :                     ;
+     375/    81EF :                     ; ************************************************************************************************
+     376/    81EF :                     
+     377/    81EF :                     __EVAnd:
+     378/    81EF : ED                  	sex 	rxRPNStack 								; Addition of TOS + (stack)
+     379/    81F0 : 8F                  	glo 	rxTOS
+     380/    81F1 : F2                  	and
+     381/    81F2 : AF                  	plo 	rxTOS
+     382/    81F3 : 1D                  	inc 	rxRPNStack
+     383/    81F4 : 9F                  	ghi 	rxTOS
+     384/    81F5 : F2                  	and
+     385/    81F6 : BF                  	phi 	rxTOS
+     386/    81F7 : 1D                  	inc  	rxRPNStack 						
+     387/    81F8 : 30 EC               	br 		__EVOpExit1
+     388/    81FA :                     
+     389/    81FA :                     ; ************************************************************************************************
+     390/    81FA :                     ;
+     391/    81FA :                     ;	16 bit Bitwise OR
+     392/    81FA :                     ;
+     393/    81FA :                     ; ************************************************************************************************
+     394/    81FA :                     
+     395/    81FA :                     __EVOr:
+     396/    81FA : ED                  	sex 	rxRPNStack 								; Addition of TOS + (stack)
+     397/    81FB : 8F                  	glo 	rxTOS
+     398/    81FC : F1                  	or
+     399/    81FD : AF                  	plo 	rxTOS
+     400/    81FE : 1D                  	inc 	rxRPNStack
+     401/    81FF : 9F                  	ghi 	rxTOS
+     402/    8200 : F1                  	or
+     403/    8201 : BF                  	phi 	rxTOS
+     404/    8202 : 1D                  	inc  	rxRPNStack 						
+     405/    8203 :                     __EVOpExit2:
+     406/    8203 : E2                  	sex 	r2
+     407/    8204 : 12                  	inc 	r2
+     408/    8205 : (MACRO)             	return
+     408/    8205 : 71                          dis                                                                                                                             ; this program uses MARK-subroutines
+     409/    8206 :                     
+     410/    8206 :                     ; ************************************************************************************************
+     411/    8206 :                     ;
+     412/    8206 :                     ;	16 bit Bitwise XOR
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 8 - 27/10/2017 9:02:18
+
+
+     413/    8206 :                     ;
+     414/    8206 :                     ; ************************************************************************************************
+     415/    8206 :                     
+     416/    8206 :                     __EVXOr:
+     417/    8206 : ED                  	sex 	rxRPNStack 								; Addition of TOS + (stack)
+     418/    8207 : 8F                  	glo 	rxTOS
+     419/    8208 : F3                  	xor
+     420/    8209 : AF                  	plo 	rxTOS
+     421/    820A : 1D                  	inc 	rxRPNStack
+     422/    820B : 9F                  	ghi 	rxTOS
+     423/    820C : F3                  	xor
+     424/    820D : BF                  	phi 	rxTOS
+     425/    820E : 1D                  	inc  	rxRPNStack 						
+     426/    820F : 30 03               	br 		__EVOpExit2
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 9 - 27/10/2017 9:02:18
 
 
   symbol table (* = unused):
@@ -334,7 +465,7 @@
 *ARCHITECTURE :                                        x86_64-unknown-linux - |
 *BIGENDIAN :                      0 - | *BRANCHEXT :                      0 - |
 *CASESENSITIVE :                  0 - | *CONSTPI :        3.141592653589793 - |
-*DATE :                  26/10/2017 - |  END1 :                        802D C |
+*DATE :                  27/10/2017 - |  END1 :                        802D C |
  ERR_UNDERFLOW :                 81 - |  EVALUATE :                    8100 C |
 *FALSE :                          0 - | *FULLPMMU :                       1 - |
 *HAS64 :                          1 - | *HASDSP :                         0 - |
@@ -347,23 +478,27 @@
 *PACKING :                        0 - | *PADDING :                        1 - |
  R2 :                             2 - |  R3 :                             3 - |
  R4 :                             4 - | *RELAXED :                        0 - |
- RXCODE :                         C - | *RXROUTINE :                      B - |
+ RXCODE :                         C - |  RXROUTINE :                      B - |
  RXRPNSTACK :                     D - |  RXTOS :                          F - |
  RXTYPE :                         E - |  S1 :                          8012 C |
 *SETUP :                       8018 C |  TESTCODE :                    802F C |
-*TIME :                    18:47:01 - | *TRUE :                           1 - |
+*TIME :                     9:02:18 - | *TRUE :                           1 - |
  VARIABLES :                    D00 - | *VERSION :                     142F - |
- __EV8BITINDIRECTION :         8120 C |  __EVDISPATCH :                818F C |
- __EVISOPERATOR :              8169 C |  __EVISREXPR :                 8126 C |
- __EVISSTRING :                815F C |  __EVMAINLOOP :                8105 C |
- __EVNOEXIT1 :                 810E C |  __EVNOEXIT2 :                 812E C |
- __EVNOTCONSTANT :             814F C |  __EVSKIPSTRING :              8163 C |
- __EVSTACKUNDERFLOW :          818B C |
+ __EV8BITINDIRECTION :         8120 C |  __EVADD :                     81E3 C |
+*__EVAND :                     81EF C |  __EVDISPATCH :                818F C |
+ __EVDISPATCHTABLE :           81A3 C |  __EVISOPERATOR :              8169 C |
+ __EVISREXPR :                 8126 C |  __EVISSTRING :                815F C |
+ __EVMAINLOOP :                8105 C |  __EVNOEXIT1 :                 810E C |
+ __EVNOEXIT2 :                 812E C |  __EVNOTCONSTANT :             814F C |
+ __EVOPEXIT1 :                 81EC C |  __EVOPEXIT2 :                 8203 C |
+*__EVOR :                      81FA C |  __EVSKIPSTRING :              8163 C |
+ __EVSTACKUNDERFLOW :          818B C |  __EVSUBTRACT :                81EC C |
+*__EVXOR :                     8206 C |
 
-     54 symbols
-     30 unused symbols
+     62 symbols
+     32 unused symbols
 
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 8 - 26/10/2017 18:47:01
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 10 - 27/10/2017 9:02:18
 
 
   defined macros:
@@ -373,7 +508,7 @@ RETURN                                |
 
       1 macro
 
- AS V1.42 Beta [Bld 114] - source file basic.asm - page 9 - 26/10/2017 18:47:01
+ AS V1.42 Beta [Bld 114] - source file basic.asm - page 11 - 27/10/2017 9:02:18
 
 
   codepages:
@@ -382,10 +517,10 @@ RETURN                                |
 STANDARD (0 changed characters)
 
 
-0.05 seconds assembly time
+0.00 seconds assembly time
 
-    306 lines source file
-    309 lines incl. macro expansions
+    426 lines source file
+    431 lines incl. macro expansions
       2 passes
       0 errors
       0 warnings

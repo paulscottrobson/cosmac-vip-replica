@@ -47,13 +47,13 @@ return macro 															; allows subroutine returns to disable/enable interr
 ;
 ;	$C0-$FE 	Represents constant values from -2 to 60
 ;
-;	$FF hh ll 	Constant value outside the C0..FE range
+;	$FF ll hh 	Constant value outside the C0..FE range
 ;
-
+;	TODO: $80-$9E nn Short array access e.g. CC4 (unsigned)
 ;
 ;	r15 :	current value on the top of the stack.
 ; 	r14	:	.0 type of value in r15 : 0=constant 1=address of 16 bit LL:HH 2=address of 8 bit.
-;			.1 temporary register / holds DF following precalculation
+;			.1 temporary register
 ;	r13 : 	RPN calculation stack. Starts with lower 4 bits zero ; one dummy value at start
 ;			(r13) points to the LSB of the 2nd stack value, (r13+1) is the MSB. Expands down.
 ;	r12 : 	Code being evaluated
@@ -90,8 +90,8 @@ Setup:
 end1:br 	end1
 
 TestCode: 	
-	db		0C2h+5
-	db 		0C2h+1
+	db 		0FFh,081h,4
+	db		0FFh,082h,1
 	db 		096h
 	db 		000h
 
@@ -284,21 +284,143 @@ __EVStackUnderflow:
 	inc 	r2
 	return 
 
+; ************************************************************************************************
+;
+;							Actually execute a unary/binary operand
+;
+; ************************************************************************************************
 
 __EVDispatch:
-	br 		__EVDispatch
+	lda 	rxCode 									; get the code again, and skip it.
+	shl 											; double it, also losing bit 7.
+	adi 	__EVDispatchTable&255
+	plo 	rxRoutine 								; make rxRoutine point into the table
+	ldi 	__EVDispatchTable/256 	
+	phi 	rxRoutine
+	lda 	rxRoutine 								; read high byte
+	phi 	rxType
+	ldn 	rxRoutine 								; read low byte and fix up
+	plo 	rxRoutine
+	ghi 	rxType
+	phi	 	rxRoutine
 
-;	lrx 	rUtilPC,ASCIIToInteger 										; call the atoi() routine.
-;	mark
-;	sep 	rUtilPC
-;	dec 	r2 		
+	sex 	r2 										; call the routine
+	mark
+	sep 	rxRoutine
+	dec 	r2	
+	br 		__EVMainLoop 							; go round again.
 
-;  	sex 	r2
-;	inc 	r2
-; 	return
-
+; ************************************************************************************************
 ;
+;	Vectors for operators. Note that the ASL assembler outputs this data in
+;	high/low order.
 ;
-;return macro 															; allows subroutine returns to disable/enable interrupts as you want.
-;	dis 																; this program uses MARK-subroutines
-;	endm
+; ************************************************************************************************
+
+__EVDispatchTable:
+	dw 		0 										; $80 @
+	dw 		0 										; $81 ?
+	dw 		0 										; $82 ~
+	dw 		0 										; $83 !
+	dw 		0,0,0,0,0,0,0,0,0,0,0,0 				; $84-$8F are unused.
+	dw 		0 										; $90 == (these are precalculated)
+	dw 		0 										; $91 !=
+	dw 		0 										; $92 <
+	dw 		0 										; $93 >=
+	dw 		0 										; $94 <=
+	dw 		0 										; $95 >
+	dw 		__EVSubtract 							; $96 - (which is already done)
+	dw 		__EVAdd 								; $97 +
+	dw 		0 										; $98 *
+	dw 		0 										; $99 /
+	dw 		0 										; $9A %
+	dw 		__EVAnd 								; $9B &
+	dw 		__EVOr 									; $9C |
+	dw 		__EVXor 								; $9D ^
+	dw 		0,0										; $9E-$9F are unused.
+
+; ************************************************************************************************
+;
+;	16 bit Addition
+;
+; ************************************************************************************************
+
+__EVAdd:
+	sex 	rxRPNStack 								; Addition of TOS + (stack)
+	glo 	rxTOS
+	add
+	plo 	rxTOS
+	inc 	rxRPNStack
+	ghi 	rxTOS
+	adc
+	phi 	rxTOS
+	inc  	rxRPNStack 								; and fall through, subtraction precalculated
+
+; ************************************************************************************************
+;
+;	16 bit Subtraction
+;
+; ************************************************************************************************
+
+__EVOpExit1:		
+__EVSubtract: 										; Subtraction is precalculated so do nothing.
+	sex 	r2
+	inc 	r2
+	return
+
+; ************************************************************************************************
+;
+;	16 bit Bitwise AND
+;
+; ************************************************************************************************
+
+__EVAnd:
+	sex 	rxRPNStack 								; Addition of TOS + (stack)
+	glo 	rxTOS
+	and
+	plo 	rxTOS
+	inc 	rxRPNStack
+	ghi 	rxTOS
+	and
+	phi 	rxTOS
+	inc  	rxRPNStack 						
+	br 		__EVOpExit1
+
+; ************************************************************************************************
+;
+;	16 bit Bitwise OR
+;
+; ************************************************************************************************
+
+__EVOr:
+	sex 	rxRPNStack 								; Addition of TOS + (stack)
+	glo 	rxTOS
+	or
+	plo 	rxTOS
+	inc 	rxRPNStack
+	ghi 	rxTOS
+	or
+	phi 	rxTOS
+	inc  	rxRPNStack 						
+__EVOpExit2:
+	sex 	r2
+	inc 	r2
+	return
+
+; ************************************************************************************************
+;
+;	16 bit Bitwise XOR
+;
+; ************************************************************************************************
+
+__EVXor:
+	sex 	rxRPNStack 								; Addition of TOS + (stack)
+	glo 	rxTOS
+	xor
+	plo 	rxTOS
+	inc 	rxRPNStack
+	ghi 	rxTOS
+	xor
+	phi 	rxTOS
+	inc  	rxRPNStack 						
+	br 		__EVOpExit2
